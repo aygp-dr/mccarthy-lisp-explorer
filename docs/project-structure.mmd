@@ -7,6 +7,7 @@ graph TD
     A --> D[tests/]
     A --> E[docs/]
     A --> F[resources/]
+    A --> P[proofs/]
     
     B --> B1[ap/mccarthy/core-functions.scm]
     B --> B2[ap/mccarthy/evaluator.scm]
@@ -16,24 +17,38 @@ graph TD
     C --> C2[factorial.scm]
     C --> C3[math-functions.scm]
     C --> C4[mccarthy-examples.scm]
+    C --> C5[mccarthy-1960.scm]
     
     D --> D1[test-core.scm]
     D --> D2[test-evaluator.scm]
     D --> D3[test-math-functions.scm]
+    D --> D4[test-mccarthy-functions.scm]
     
-    E --> E1[mccarthy-paper-notes.md]
-    E --> E2[implementation-guide.md]
+    E --> E1[mccarthy-paper-notes.org]
+    E --> E2[implementation-guide.org]
     E --> E3[project-structure.mmd]
-    E --> E4[workshop-schedule.md]
+    E --> E4[workshop-schedule.org]
     
     F --> F1[recursive.pdf]
+    F --> F2[mccarthy.png]
+    F --> F3[language-influence.png]
+    F --> F4[lisp-logo.png]
+    
+    P --> P1[all_tests.v]
+    P --> P2[basic/]
+    P --> P3[factorial/]
+    P --> P4[fibonacci/]
+    P --> P5[gcd/]
+    P --> P6[lambda/]
+    P --> P7[sqrt/]
     
     G[Main Files] --> G1[README.org]
     G --> G2[READING_GUIDE.org]
     G --> G3[EXERCISES.org]
     G --> G4[run-all.scm]
-    G --> G5[interactive-examples.scm]
-    G --> G6[Makefile]
+    G --> G5[coq-proofs.org]
+    G --> G6[presentation.org]
+    G --> G7[Makefile]
 
     %% Core functions explanation
     subgraph "Core Implementation"
@@ -48,6 +63,9 @@ graph TD
         H2 -->|"Contains"| J1[equal?]
         H2 -->|"Contains"| J2[append]
         H2 -->|"Contains"| J3[pair]
+        H2 -->|"Contains"| J4[subst]
+        H2 -->|"Contains"| J5[member]
+        H2 -->|"Contains"| J6[apply-to-all]
         H3 -->|"Contains"| K1[factorial]
         H3 -->|"Contains"| K2[gcd-recursive]
         H3 -->|"Contains"| K3[sqrt-approx]
@@ -60,4 +78,19 @@ graph TD
         L1 -->|"Contains"| M2[apply]
         L1 -->|"Contains"| M3[evlis]
         L1 -->|"Contains"| M4[evcon]
+        L1 -->|"Contains"| M5[define]
+        L1 -->|"Contains"| M6[let]
+    end
+    
+    %% Coq proofs
+    subgraph "Coq Formal Verification"
+        P1 -->|"Verifies"| Q1[All Proofs]
+        P2 -->|"Contains"| Q2[Addition Properties]
+        P3 -->|"Contains"| Q3[Factorial Correctness]
+        P4 -->|"Contains"| Q4[Fibonacci Properties]
+        P5 -->|"Contains"| Q5[GCD Correctness]
+        P6 -->|"Contains"| Q6[Lambda Calculus]
+        P7 -->|"Contains"| Q7[Square Root Approximation]
+        P6 --> Q8[Y Combinator]
+        P6 --> Q9[McCarthy Connection]
     end

@@ -1,0 +1,536 @@
+#+TITLE: McCarthy Lisp Explorer: Formalizing Early Lisp Concepts
+#+AUTHOR: Jason Walsh
+#+EMAIL: j@wal.sh
+#+DATE: May 5, 2025
+#+OPTIONS: num:nil ^:nil toc:nil H:2
+#+STARTUP: overview indent content
+#+BIBLIOGRAPHY: citations.bib
+#+LATEX_CLASS: beamer
+#+LATEX_CLASS_OPTIONS: [presentation,aspectratio=169]
+#+BEAMER_THEME: Madrid
+#+BEAMER_COLOR_THEME: dolphin
+#+BEAMER_FONT_THEME: structurebold
+#+BEAMER_HEADER: \AtBeginSection[]{\begin{frame}<beamer>\frametitle{Outline}\tableofcontents[currentsection]\end{frame}}
+#+PROPERTY: header-args:scheme :eval yes :exports both
+#+PROPERTY: header-args:coq :eval no :exports both
+
+* McCarthy Lisp Explorer
+:PROPERTIES:
+:BEAMER_OPT: standout
+:END:
+
+** Formalizing Early Lisp Concepts with Coq
+#+BEGIN_NOTES
+- Welcome everyone to this presentation on the McCarthy Lisp Explorer project
+- This presentation will take approximately 30 minutes, with Q&A afterward
+- Feel free to ask questions at any time
+#+END_NOTES
+
+- A formal verification approach to McCarthy's original 1960 work
+- Using Coq to prove correctness of foundational algorithms
+- Interactive exploration of early Lisp concepts
+
+* Introduction
+:PROPERTIES:
+:BEAMER_ACT: <2->
+:END:
+
+** John McCarthy's Lisp (1960)                                     :B_frame:
+:PROPERTIES:
+:BEAMER_opt: t
+:END:
+#+BEGIN_NOTES
+- Timing: 3 minutes
+- Show original paper if asked about details
+- Emphasize how ahead of its time this work was
+#+END_NOTES
+
+- Second-oldest high-level programming language (after FORTRAN)
+- Published in "Recursive Functions of Symbolic Expressions..." [cite:@mccarthy1960recursive]
+- Revolutionary concepts that still influence programming today
+- Created at MIT between 1958-1960
+
+#+ATTR_LATEX: :width 0.4\textwidth
+#+CAPTION: John McCarthy (1927-2011)
+[[file:resources/mccarthy.svg]]
+
+** Foundational Concepts Introduced
+#+BEGIN_NOTES
+- Timing: 5 minutes
+- These concepts are all interconnected
+- The metacircular evaluator is the most revolutionary part
+- Many modern languages still implement these ideas
+#+END_NOTES
+
+- S-expressions as a universal data structure
+- Conditional expressions (the precursor to if-then-else)
+- Recursive function definitions
+- Functions as first-class objects
+- Symbol manipulation capabilities
+- The metacircular evaluator (APPLY)
+
+#+BEGIN_SRC scheme
+;; Example S-expression and basic operations
+(define expr '(a b (c d) e))
+(car expr)     ; => a
+(cdr expr)     ; => (b (c d) e)
+(cadr expr)    ; => b
+#+END_SRC
+
+* Our Approach
+:PROPERTIES:
+:BEAMER_ACT: <3->
+:END:
+
+** Project Goals
+#+BEGIN_NOTES
+- Timing: 3 minutes
+- Mention that this is an educational project
+- Emphasize the connection between theory and practice
+#+END_NOTES
+
+- Formalize McCarthy's original concepts using modern proof tools
+- Provide rigorous mathematical proofs for key algorithms
+- Create a learning environment for understanding Lisp foundations
+- Connect historical ideas to modern functional programming
+
+#+BEGIN_SRC scheme
+;; Original McCarthy evaluator (simplified)
+(define (mc-eval expr env)
+  (cond ((atom? expr) (lookup expr env))
+        ((eq? (car expr) 'quote) (cadr expr))
+        ((eq? (car expr) 'cond) (evcond (cdr expr) env))
+        (else (mc-apply (mc-eval (car expr) env)
+                       (evlis (cdr expr) env)))))
+#+END_SRC
+
+** Tools & Technologies
+#+BEGIN_NOTES
+- Timing: 2 minutes
+- Mention that all tools are open source
+- Emphasize the literate programming aspect with org-mode
+#+END_NOTES
+
+- Coq for formal verification and proofs [cite:@coq]
+- Scheme/Guile for executable examples
+- Org-mode for literate programming
+- Emacs as the development environment
+
+#+ATTR_LATEX: :width 0.8\textwidth
+#+CAPTION: Project Structure
+[[file:docs/project-structure.mmd]]
+
+* Core Mathematical Formalizations
+:PROPERTIES:
+:BEAMER_ACT: <4->
+:END:
+
+** Basic Arithmetic Properties
+#+BEGIN_NOTES
+- Timing: 4 minutes
+- This section demonstrates how we can use Coq to prove basic properties
+- Skip detailed proof explanation unless specifically asked
+#+END_NOTES
+
+#+BEGIN_SRC coq
+Theorem plus_comm : forall n m : nat,
+  n + m = m + n.
+Proof.
+  intros n m.
+  induction n as [|n' IHn'].
+  - simpl. rewrite plus_n_O. reflexivity.
+  - simpl. rewrite IHn'. rewrite plus_n_Sm. reflexivity.
+Qed.
+#+END_SRC
+
+*** Corresponding implementation in Scheme
+#+BEGIN_SRC scheme
+;; Addition is built-in, but we can define commutative-add
+(define (commutative-add a b)
+  (if (= a 0)
+      b
+      (commutative-add (- a 1) (+ b 1))))
+#+END_SRC
+
+** Factorial Function
+#+BEGIN_NOTES
+- Timing: 3 minutes
+- Show how the same function is expressed in both Coq and Scheme
+- Emphasize the importance of the positivity proof for correctness
+#+END_NOTES
+
+#+BEGIN_SRC coq
+Fixpoint factorial (n : nat) : nat :=
+  match n with
+  | 0 => 1
+  | S n' => n * factorial n'
+  end.
+
+Theorem factorial_positive : forall n : nat,
+  factorial n > 0.
+Proof.
+  intros n.
+  induction n; simpl.
+  - apply le_n.
+  - apply Nat.mul_pos_pos; auto.
+    apply Nat.lt_0_succ.
+Qed.
+#+END_SRC
+
+*** Implementation in our Scheme library
+#+BEGIN_SRC scheme
+(define (factorial n)
+  (cond ((= n 0) 1)
+        (else (* n (factorial (- n 1))))))
+#+END_SRC
+
+* Recursive Algorithms
+:PROPERTIES:
+:BEAMER_ACT: <5->
+:END:
+
+** Greatest Common Divisor (GCD)
+#+BEGIN_NOTES
+- Timing: 4 minutes
+- The GCD algorithm demonstrates Euclid's algorithm
+- Highlight the recursive nature which was revolutionary in 1960
+#+END_NOTES
+
+#+BEGIN_SRC coq
+Fixpoint gcd (a b : nat) : nat :=
+  match b with
+  | 0 => match a with
+         | 0 => 0  (* Special case: gcd(0,0) = 0 *)
+         | _ => a
+         end
+  | _ => gcd b (a mod b)
+  end.
+
+Theorem gcd_divides_both : forall a b : nat,
+  b <> 0 -> (gcd a b | a) /\ (gcd a b | b).
+Proof.
+  (* Proof details omitted for brevity *)
+Admitted.
+
+Example gcd_17_5 : gcd 17 5 = 1.
+Proof. reflexivity. Qed.
+#+END_SRC
+
+*** Implementation in Scheme
+#+BEGIN_SRC scheme
+(define (gcd-recursive a b)
+  (cond ((= b 0) (if (= a 0) 0 a))
+        (else (gcd-recursive b (remainder a b)))))
+#+END_SRC
+
+** Fibonacci Sequence
+#+BEGIN_NOTES
+- Timing: 3 minutes
+- Highlight the exponential time complexity of naive recursion
+- Mention that McCarthy's Lisp was the first language to handle this elegantly
+#+END_NOTES
+
+#+BEGIN_SRC coq
+Fixpoint fib (n : nat) : nat :=
+  match n with
+  | 0 => 0
+  | 1 => 1
+  | S (S n' as n'') => fib n' + fib n''
+  end.
+
+Theorem fib_monotone : forall n m : nat,
+  n <= m -> fib n <= fib m.
+Proof.
+  (* Proof details omitted for brevity *)
+Admitted.
+
+Example fib_7 : fib 7 = 13.
+Proof. reflexivity. Qed.
+#+END_SRC
+
+*** Implementation in Scheme with tracing
+#+BEGIN_SRC scheme
+(define (fib n)
+  (cond ((= n 0) 0)
+        ((= n 1) 1)
+        (else (+ (fib (- n 1)) 
+                 (fib (- n 2))))))
+#+END_SRC
+
+* Lambda Calculus Connection
+:PROPERTIES:
+:BEAMER_ACT: <6->
+:END:
+
+** Lambda Terms Formalization                                       :B_block:
+:PROPERTIES:
+:BEAMER_env: block
+:END:
+#+BEGIN_NOTES
+- Timing: 5 minutes
+- The lambda calculus connection explains the theoretical foundation
+- McCarthy was influenced by Church's lambda calculus
+#+END_NOTES
+
+#+BEGIN_SRC coq
+Definition id := nat.
+
+Inductive term : Type :=
+  | Var : id -> term                  (* Variables *)
+  | App : term -> term -> term        (* Application *)
+  | Abs : id -> term -> term.         (* Abstraction *)
+
+(* Beta reduction (simplified) *)
+Inductive beta_step : term -> term -> Prop :=
+  | beta_base : forall x t s, 
+      beta_step (App (Abs x t) s) (subst x s t)
+  | beta_app1 : forall t t' s,
+      beta_step t t' -> beta_step (App t s) (App t' s)
+  | beta_app2 : forall t s s',
+      beta_step s s' -> beta_step (App t s) (App t s')
+  | beta_abs : forall x t t',
+      beta_step t t' -> beta_step (Abs x t) (Abs x t').
+#+END_SRC
+
+*** Scheme representation of lambda
+#+BEGIN_SRC scheme
+;; Lambda expression as a scheme procedure
+(define (make-lambda var body)
+  (lambda (env)
+    (lambda (arg)
+      (eval body (extend-env var arg env)))))
+#+END_SRC
+
+** Y Combinator - Enabling Recursion
+#+BEGIN_NOTES
+- Timing: 3 minutes
+- The Y combinator is a fundamental concept for recursion
+- Explain how it allows recursion without explicit self-reference
+#+END_NOTES
+
+#+BEGIN_SRC coq
+Definition Y_combinator :=
+  Abs 0 (
+    App 
+      (Abs 1 (App (Var 0) (App (Var 1) (Var 1))))
+      (Abs 1 (App (Var 0) (App (Var 1) (Var 1))))
+  ).
+
+(* Y combinator property: Y f = f (Y f) *)
+Theorem Y_property : forall f,
+  beta_star (App Y_combinator f) 
+            (App f (App Y_combinator f)).
+Proof.
+  (* Proof details omitted for brevity *)
+Admitted.
+#+END_SRC
+
+*** Y combinator in Scheme
+#+BEGIN_SRC scheme
+;; Y combinator implementation
+(define Y
+  (lambda (f)
+    ((lambda (x) (f (lambda (y) ((x x) y))))
+     (lambda (x) (f (lambda (y) ((x x) y)))))))
+
+;; Using Y to define factorial
+(define factorial
+  (Y (lambda (fact)
+       (lambda (n)
+         (if (= n 0)
+             1
+             (* n (fact (- n 1))))))))
+#+END_SRC
+
+* The Universal APPLY Function
+:PROPERTIES:
+:BEAMER_ACT: <7->
+:END:
+
+** McCarthy's Metacircular Evaluator                              :B_fullframe:
+:PROPERTIES:
+:BEAMER_env: fullframe
+:END:
+#+BEGIN_NOTES
+- Timing: 5 minutes
+- This is perhaps McCarthy's most influential contribution
+- Explain how the evaluator is written in terms of itself
+#+END_NOTES
+
+- A function that evaluates other functions
+- Foundation of interpreters and reflective languages
+- Self-applicable - can evaluate itself
+
+#+BEGIN_SRC scheme
+;; McCarthy's original evaluator (implemented in our system)
+(define (eval expr env)
+  (cond 
+   ;; Variable reference
+   ((atom? expr) (lookup-var expr env))
+   
+   ;; Quote special form
+   ((eq? (car expr) 'quote) (car (cdr expr)))
+   
+   ;; Conditional expression
+   ((eq? (car expr) 'cond) (evcon (cdr expr) env))
+   
+   ;; Function application
+   (else (apply (eval (car expr) env)
+                (evlis (cdr expr) env)))))
+
+(define (apply fn args)
+  (cond 
+   ;; Primitive function
+   ((atom? fn) (apply-primitive fn args))
+   
+   ;; Lambda expression
+   ((eq? (car fn) 'lambda)
+    (eval (car (cdr (cdr fn)))
+          (pair (car (cdr fn)) args)))))
+#+END_SRC
+
+** Connection to Modern Interpreters
+#+BEGIN_NOTES
+- Timing: 3 minutes
+- Emphasize how these concepts appear in modern programming languages
+- Mention the influence on programming language theory
+#+END_NOTES
+
+- Pattern established for future language implementations
+- Enabled bootstrap compilers and self-hosting languages
+- Influenced design of Lisp machines and specialized hardware
+
+#+BEGIN_SRC scheme
+;; Example evaluation
+(eval '((lambda (x) (+ x 1)) 2) primitive-functions)
+;; => 3
+
+;; Self-application (conceptual)
+(eval '(eval '(+ 1 2) e) e)
+;; => 3
+#+END_SRC
+
+* From Theory to Practice
+:PROPERTIES:
+:BEAMER_ACT: <8->
+:END:
+
+** Modern Concepts from McCarthy's Work
+#+BEGIN_NOTES
+- Timing: 3 minutes
+- Emphasize how ubiquitous these concepts are today
+- Mention that these were all radical innovations in 1960
+#+END_NOTES
+
+- Pattern matching (COND expressions)
+- Higher-order functions
+- Garbage collection
+- REPL (Read-Eval-Print Loop)
+- Dynamic typing
+- Symbolic computing
+
+#+BEGIN_SRC scheme
+;; Higher-order function example
+(define (map f lst)
+  (cond ((null? lst) '())
+        (else (cons (f (car lst))
+                    (map f (cdr lst))))))
+
+(map (lambda (x) (* x x)) '(1 2 3 4))
+;; => (1 4 9 16)
+#+END_SRC
+
+** Languages Influenced by These Ideas
+#+BEGIN_NOTES
+- Timing: 2 minutes
+- Point out that functional programming is now mainstream
+- Most popular languages now incorporate these ideas
+#+END_NOTES
+
+- Lisp family: Common Lisp, Scheme, Clojure [cite:@graham1996ansi]
+- ML family: OCaml, SML, F#
+- Haskell
+- Scala, Elixir, Erlang
+- JavaScript (especially functional aspects)
+- Python, Ruby (symbolic aspects)
+
+#+ATTR_LATEX: :width 0.8\textwidth
+#+CAPTION: Influence on Modern Languages
+[[file:resources/language-influence.svg]]
+
+* Exercises and Further Learning
+:PROPERTIES:
+:BEAMER_ACT: <9->
+:END:
+
+** Exploring the Repository
+#+BEGIN_NOTES
+- Timing: 2 minutes
+- Encourage attendees to try these exercises
+- Highlight that the repository is designed for learning
+#+END_NOTES
+
+- Complete the admitted proofs in the Coq files
+- Add new algorithms and verify them formally
+- Extend the lambda calculus formalization
+- Connect proofs to executable Scheme code
+- Create new examples that demonstrate McCarthy's ideas
+
+#+BEGIN_SRC scheme
+;; Example exercise: Implement a metacircular evaluator extension
+;; for let expressions
+(define (eval-let expr env)
+  (let* ((bindings (cadr expr))
+         (body (caddr expr))
+         (vars (map car bindings))
+         (vals (map (lambda (b) (eval (cadr b) env)) bindings))
+         (new-env (extend-env (pair vars vals) env)))
+    (eval body new-env)))
+#+END_SRC
+
+** Resources
+#+BEGIN_NOTES
+- Timing: 2 minutes
+- Mention that all of these resources are linked in the repository
+- SICP is particularly recommended for those interested in interpreters
+#+END_NOTES
+
+- Original McCarthy paper (1960) [cite:@mccarthy1960recursive]
+- Structure and Interpretation of Computer Programs (SICP) [cite:@abelson1996structure]
+- The History of LISP [cite:@mccarthy1981history]
+- Interactive examples in the repository
+- Coq documentation and tutorials
+
+* Conclusion
+:PROPERTIES:
+:BEAMER_ACT: <10->
+:END:
+
+** Project Information                                            :B_fullframe:
+:PROPERTIES:
+:BEAMER_env: fullframe
+:END:
+#+BEGIN_NOTES
+- Timing: 2 minutes
+- Wrap up with information on how to get involved
+- Thank the audience for their attention
+#+END_NOTES
+
+- Documentation in org-mode format (literate programming)
+- Exercises for further learning in EXERCISES.org
+- GitHub repository: https://github.com/jwalsh/mccarthy-lisp-explorer
+- Contributions welcome via pull requests!
+
+** Thank You!                                                     :B_standout:
+:PROPERTIES:
+:BEAMER_env: standout
+:END:
+
+Questions or suggestions?
+
+Contact: j@wal.sh
+
+#+ATTR_LATEX: :width 0.3\textwidth
+[[file:resources/lisp-logo.svg]]
+
+#+PRINT_BIBLIOGRAPHY:
