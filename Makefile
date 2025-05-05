@@ -100,6 +100,14 @@ presentation.pdf: presentation.org citations.bib ## Generate presentation slides
 		--visit=presentation.org --funcall org-beamer-export-to-pdf
 	@echo "Presentation PDF built successfully."
 
+presentation-tangle: ## Tangle code blocks from presentation.org to presentation/ directory
+	@echo "Tangling code from presentation.org to presentation/ directory..."
+	@emacs --batch --eval "(require 'org)" \
+		--eval "(org-babel-tangle-file \"presentation.org\")"
+	@echo "Presentation tangling complete."
+	@echo "Files in presentation directory:"
+	@ls -la ./presentation/
+
 present: presentation.pdf ## Present slides with pdfpc or fallback to PDF viewer
 	@echo "Starting presentation..."
 	@if command -v pdfpc >/dev/null 2>&1; then \

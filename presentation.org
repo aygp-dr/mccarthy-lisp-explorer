@@ -11,8 +11,8 @@
 #+BEAMER_COLOR_THEME: dolphin
 #+BEAMER_FONT_THEME: structurebold
 #+BEAMER_HEADER: \AtBeginSection[]{\begin{frame}<beamer>\frametitle{Outline}\tableofcontents[currentsection]\end{frame}}
-#+PROPERTY: header-args:scheme :eval yes :exports both
-#+PROPERTY: header-args:coq :eval no :exports both
+#+PROPERTY: header-args:scheme :eval yes :exports both :tangle-dir "./presentation" :mkdirp yes
+#+PROPERTY: header-args:coq :eval no :exports both :tangle-dir "./presentation" :mkdirp yes
 
 * McCarthy Lisp Explorer
 :PROPERTIES:
@@ -69,7 +69,7 @@
 - Symbol manipulation capabilities
 - The metacircular evaluator (APPLY)
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :tangle s-expressions.scm
 ;; Example S-expression and basic operations
 (define expr '(a b (c d) e))
 (car expr)     ; => a
@@ -94,7 +94,7 @@
 - Create a learning environment for understanding Lisp foundations
 - Connect historical ideas to modern functional programming
 
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :tangle evaluator-simple.scm
 ;; Original McCarthy evaluator (simplified)
 (define (mc-eval expr env)
   (cond ((atom? expr) (lookup expr env))
@@ -132,7 +132,7 @@
 - Skip detailed proof explanation unless specifically asked
 #+END_NOTES
 
-#+BEGIN_SRC coq
+#+BEGIN_SRC coq :tangle plus-comm.v
 Theorem plus_comm : forall n m : nat,
   n + m = m + n.
 Proof.
@@ -144,7 +144,7 @@ Qed.
 #+END_SRC
 
 *** Corresponding implementation in Scheme
-#+BEGIN_SRC scheme
+#+BEGIN_SRC scheme :tangle commutative-add.scm
 ;; Addition is built-in, but we can define commutative-add
 (define (commutative-add a b)
   (if (= a 0)
