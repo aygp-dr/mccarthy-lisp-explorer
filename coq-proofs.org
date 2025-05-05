@@ -1,0 +1,828 @@
+#+TITLE: McCarthy Lisp Explorer: Coq Proofs Collection
+#+AUTHOR: Jason Walsh <j@wal.sh>
+#+DATE: 2025-05-05
+#+OPTIONS: toc:3 num:t
+#+PROPERTY: header-args:emacs-lisp :tangle ./mccarthy-lisp-explorer-coq.el :mkdirp yes
+#+PROPERTY: header-args:coq :tangle-dir "./proofs" :mkdirp yes
+
+* Introduction
+
+This document contains a collection of Coq proofs starting from basic arithmetic properties to
+more complex algorithms. These proofs demonstrate formal verification techniques that can be 
+applied to functional programming concepts related to McCarthy's original Lisp.
+
+All proofs are designed to be tangled into the =proofs= directory within the McCarthy Lisp Explorer
+project and can be run through Proof General in Emacs.
+
+* Setup Proof General and Coq Environment
+
+This section sets up Emacs with Proof General for Coq development. The code here will
+tangle to =./mccarthy-lisp-explorer-coq.el=, which you can load in your Emacs initialization.
+
+** Install and Configure Proof General
+
+#+begin_src emacs-lisp
+;;; mccarthy-lisp-explorer-coq.el --- Coq integration for McCarthy Lisp Explorer
+
+;;; Commentary:
+;; This file provides Coq integration for the McCarthy Lisp Explorer project.
+;; It sets up Proof General and related tools for working with Coq proofs.
+
+;;; Code:
+
+;; Ensure package system is initialized
+(require 'package)
+(add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
+(package-initialize)
+
+;; Install Proof General if not already installed
+(unless (package-installed-p 'proof-general)
+  (package-refresh-contents)
+  (package-install 'proof-general))
+
+;; Install Company-Coq for enhanced Coq experience
+(unless (package-installed-p 'company-coq)
+  (package-install 'company-coq))
+
+;; Load and configure Proof General
+(require 'proof-general)
+(setq proof-three-window-mode-policy 'hybrid)  ;; Better window layout
+(setq proof-script-fly-past-comments t)         ;; Skip comments when processing
+(setq proof-splash-enable nil)                  ;; Disable splash screen
+
+;; Configure Company-Coq
+(add-hook 'coq-mode-hook #'company-coq-mode)
+
+;; Set up keybindings for convenience
+(with-eval-after-load 'proof-script
+  (define-key proof-mode-map (kbd "C-c C-j") 'proof-goto-point)
+  (define-key proof-mode-map (kbd "C-c C-,") 'proof-undo-last-successful-command))
+
+;; Path to Coq executable - adjust as needed for your FreeBSD setup
+(setq coq-prog-name "/usr/local/bin/coqtop")
+
+;; Configure org-babel for Coq
+(with-eval-after-load 'org
+  (org-babel-do-load-languages
+   'org-babel-load-languages
+   '((coq . t))))
+
+;; Integration with mccarthy-lisp-explorer.el
+(with-eval-after-load 'mccarthy-lisp-explorer
+  (message "Integrating Coq proofs with McCarthy Lisp Explorer"))
+
+(provide 'mccarthy-lisp-explorer-coq)
+;;; mccarthy-lisp-explorer-coq.el ends here
+#+end_src
+
+** Create Project Directory Structure
+
+#+begin_src shell :tangle ./proofs/setup.sh :shebang "#!/bin/sh" :mkdirp yes
+# Create proofs directory structure within the McCarthy Lisp Explorer project
+mkdir -p ./proofs/basic
+mkdir -p ./proofs/factorial
+mkdir -p ./proofs/gcd
+mkdir -p ./proofs/fibonacci
+mkdir -p ./proofs/sqrt
+mkdir -p ./proofs/lambda
+
+# Create _CoqProject file
+cat > ./proofs/_CoqProject << EOF
+-R . McCarthyLispProofs
+EOF
+
+echo "Directory structure created successfully!"
+echo "To compile all proofs, navigate to ./proofs and run:"
+echo "coq_makefile -f _CoqProject *.v **/*.v -o Makefile && make"
+#+end_src
+
+Make the setup script executable:
+
+#+begin_src shell :dir ./ :results none
+chmod +x ./proofs/setup.sh
+#+end_src
+
+* Basic Addition Properties
+:PROPERTIES:
+:header-args:coq: :tangle ./proofs/basic/addition.v :mkdirp yes
+:END:
+
+Let's start with some simple proofs about addition of natural numbers, which form the basis for understanding
+recursive functions in the style of McCarthy's Lisp.
+
+#+begin_src coq
+(** Basic properties of addition on natural numbers *)
+
+(** First, let's prove that 0 is a right identity for addition *)
+Theorem plus_n_O : forall n : nat, n + 0 = n.
+Proof.
+  intros n.
+  induction n as [|n' IHn'].
+  - reflexivity.  (* Base case: 0 + 0 = 0 *)
+  - simpl.        (* Inductive case: (S n') + 0 = S n' *)
+    rewrite IHn'. (* Use induction hypothesis *)
+    reflexivity.
+Qed.
+
+(** Now, let's prove that 0 is a left identity for addition *)
+Theorem plus_O_n : forall n : nat, 0 + n = n.
+Proof.
+  intros n.
+  reflexivity.  (* This is trivial by definition of addition *)
+Qed.
+
+(** Let's prove the associativity of addition *)
+Theorem plus_assoc : forall n m p : nat,
+  n + (m + p) = (n + m) + p.
+Proof.
+  intros n m p.
+  induction n as [|n' IHn'].
+  - reflexivity.   (* Base case: 0 + (m + p) = (0 + m) + p *)
+  - simpl.         (* Inductive case: S n' + (m + p) = (S n' + m) + p *)
+    rewrite IHn'.  (* Use induction hypothesis *)
+    reflexivity.
+Qed.
+
+(** Commutativity of addition requires a helper lemma *)
+Lemma plus_n_Sm : forall n m : nat,
+  n + S m = S (n + m).
+Proof.
+  intros n m.
+  induction n as [|n' IHn'].
+  - reflexivity.  (* Base case: 0 + S m = S (0 + m) *)
+  - simpl.        (* Inductive case: S n' + S m = S (S n' + m) *)
+    rewrite IHn'. (* Use induction hypothesis *)
+    reflexivity.
+Qed.
+
+(** Now we can prove commutativity *)
+Theorem plus_comm : forall n m : nat,
+  n + m = m + n.
+Proof.
+  intros n m.
+  induction n as [|n' IHn'].
+  - rewrite plus_O_n. (* Base case: 0 + m = m + 0 *)
+    symmetry.
+    apply plus_n_O.
+  - simpl.            (* Inductive case: S n' + m = m + S n' *)
+    rewrite IHn'.     (* Use induction hypothesis *)
+    rewrite plus_n_Sm. (* Use helper lemma *)
+    reflexivity.
+Qed.
+#+end_src
+
+* Factorial Function
+:PROPERTIES:
+:header-args:coq: :tangle ./proofs/factorial/factorial.v :mkdirp yes
+:END:
+
+Now let's define the factorial function and prove some of its properties.
+This demonstrates recursive function definition similar to McCarthy's approach in Lisp.
+
+#+begin_src coq
+(** Definition and properties of the factorial function *)
+
+(** Recursive definition of factorial *)
+Fixpoint factorial (n : nat) : nat :=
+  match n with
+  | 0 => 1
+  | S n' => n * factorial n'
+  end.
+
+(** Let's compute some examples *)
+Example factorial_0 : factorial 0 = 1.
+Proof. reflexivity. Qed.
+
+Example factorial_1 : factorial 1 = 1.
+Proof. reflexivity. Qed.
+
+Example factorial_5 : factorial 5 = 120.
+Proof. reflexivity. Qed.
+
+(** Factorial is always positive *)
+Theorem factorial_positive : forall n : nat,
+  factorial n > 0.
+Proof.
+  intros n.
+  induction n as [|n' IHn'].
+  - simpl. apply le_n.  (* factorial 0 = 1 > 0 *)
+  - simpl.              (* factorial (S n') = (S n') * factorial n' *)
+    apply Nat.mul_pos_pos.
+    + apply Nat.lt_0_succ. (* S n' > 0 *)
+    + exact IHn'.         (* factorial n' > 0 by induction *)
+Qed.
+
+(** Relation between successive factorials *)
+Theorem factorial_succ : forall n : nat,
+  factorial (S n) = (S n) * factorial n.
+Proof.
+  intros n.
+  simpl. (* This follows directly from the definition *)
+  reflexivity.
+Qed.
+
+(** Alternative definition of factorial using recursion equation - 
+    This style is closer to McCarthy's approach in defining recursive functions *)
+Definition factorial_rec (n : nat) : nat :=
+  if n =? 0 then 1 else n * factorial_rec (n - 1).
+
+(** The two definitions are equivalent *)
+Theorem factorial_equivalent : forall n : nat,
+  factorial n = factorial_rec n.
+Proof.
+  intros n.
+  induction n as [|n' IHn'].
+  - simpl. reflexivity.
+  - simpl.
+    rewrite IHn'.
+    rewrite Nat.sub_0_r.
+    rewrite Nat.eqb_refl.
+    reflexivity.
+Qed.
+#+end_src
+
+* Greatest Common Divisor (GCD)
+:PROPERTIES:
+:header-args:coq: :tangle ./proofs/gcd/gcd.v :mkdirp yes
+:END:
+
+Let's implement and prove properties of the Greatest Common Divisor using Euclid's algorithm,
+which demonstrates recursive algorithms with multiple conditions.
+
+#+begin_src coq
+(** Definition and properties of the Greatest Common Divisor *)
+
+(** First, we need some definitions about divisibility *)
+Definition divides (a b : nat) : Prop := exists k, b = k * a.
+
+Notation "a | b" := (divides a b) (at level 70, no associativity).
+
+(** Euclidean algorithm for GCD - this recursive approach is similar to
+    McCarthy's conditional expressions in Lisp *)
+Fixpoint gcd (a b : nat) : nat :=
+  match b with
+  | 0 => match a with
+         | 0 => 0  (* Special case: gcd(0,0) = 0 *)
+         | _ => a
+         end
+  | _ => gcd b (a mod b)
+  end.
+
+(** Let's test the implementation with some examples *)
+Example gcd_17_5 : gcd 17 5 = 1.
+Proof. reflexivity. Qed.
+
+Example gcd_12_18 : gcd 12 18 = 6.
+Proof. reflexivity. Qed.
+
+(** GCD is commutative *)
+Theorem gcd_comm : forall a b : nat,
+  gcd a b = gcd b a.
+Proof.
+  intros a b.
+  destruct b.
+  - destruct a.
+    + reflexivity.
+    + simpl. rewrite Nat.mod_0_r. reflexivity.
+  - simpl.
+    destruct a.
+    + simpl. reflexivity.
+    + (* This part requires more work, we'll need to use properties of mod *)
+      (* For now, we'll leave it as admitted *)
+Admitted.
+
+(** GCD divides both numbers *)
+Lemma gcd_divides_a : forall a b : nat,
+  b > 0 -> gcd a b | a.
+Proof.
+  (* This proof requires several helper lemmas about modulo *)
+  (* For simplicity, we'll admit this lemma *)
+Admitted.
+
+Lemma gcd_divides_b : forall a b : nat,
+  b > 0 -> gcd a b | b.
+Proof.
+  (* This also requires helper lemmas *)
+Admitted.
+
+(** GCD is the greatest common divisor *)
+Theorem gcd_greatest : forall a b c : nat,
+  b > 0 -> c | a -> c | b -> c | gcd a b.
+Proof.
+  (* This is a more complex property requiring multiple steps *)
+Admitted.
+#+end_src
+
+* Fibonacci Sequence
+:PROPERTIES:
+:header-args:coq: :tangle ./proofs/fibonacci/fibonacci.v :mkdirp yes
+:END:
+
+Let's implement the Fibonacci sequence and prove some of its properties. This demonstrates
+pattern matching and multiple recursive calls, a concept extended from McCarthy's work.
+
+#+begin_src coq
+(** Definition and properties of the Fibonacci sequence *)
+
+(** Recursive definition of Fibonacci *)
+Fixpoint fib (n : nat) : nat :=
+  match n with
+  | 0 => 0
+  | 1 => 1
+  | S (S n' as n'') => fib n' + fib n''
+  end.
+
+(** Test with some examples *)
+Example fib_0 : fib 0 = 0.
+Proof. reflexivity. Qed.
+
+Example fib_1 : fib 1 = 1.
+Proof. reflexivity. Qed.
+
+Example fib_2 : fib 2 = 1.
+Proof. reflexivity. Qed.
+
+Example fib_7 : fib 7 = 13.
+Proof. reflexivity. Qed.
+
+(** Every Fibonacci number after the first is positive *)
+Theorem fib_positive : forall n : nat,
+  n > 0 -> fib n > 0.
+Proof.
+  intros n H.
+  destruct n.
+  - inversion H. (* Contradiction: 0 > 0 is false *)
+  - induction n.
+    + simpl. apply Nat.lt_0_1. (* fib 1 = 1 > 0 *)
+    + simpl.                  (* fib (S (S n)) = fib n + fib (S n) *)
+      apply Nat.add_pos_pos.
+      * apply IHn. apply Nat.lt_0_succ.
+      * apply Nat.lt_0_1.
+Qed.
+
+(** Alternating sum of Fibonacci numbers: fib(n+1) - fib(n-1) = fib(n-2) *)
+Theorem fib_alternating_sum : forall n : nat,
+  n >= 3 -> fib (n + 1) - fib (n - 1) = fib (n - 2).
+Proof.
+  intros n Hn.
+  (* This requires careful manipulation of the recursive definition *)
+  (* For simplicity, we'll admit this theorem *)
+Admitted.
+
+(** Fibonacci numbers grow at least linearly *)
+Theorem fib_grows_linearly : forall n : nat,
+  n >= 6 -> fib n >= n.
+Proof.
+  intros n Hn.
+  (* This requires induction with a stronger hypothesis *)
+Admitted.
+
+(** Iterative computation of Fibonacci (more efficient) - 
+    This is analogous to tail recursion optimization, a concept that evolved
+    from McCarthy's early work *)
+Fixpoint fib_iter (n a b : nat) : nat :=
+  match n with
+  | 0 => a
+  | S n' => fib_iter n' b (a + b)
+  end.
+
+Definition fibonacci (n : nat) : nat := fib_iter n 0 1.
+
+(** The iterative implementation is equivalent to the recursive one *)
+Theorem fib_equivalent : forall n : nat,
+  fib n = fibonacci n.
+Proof.
+  (* This requires a helper lemma and careful induction *)
+Admitted.
+#+end_src
+
+* Square Root (Integer Square Root)
+:PROPERTIES:
+:header-args:coq: :tangle ./proofs/sqrt/sqrt.v :mkdirp yes
+:END:
+
+Let's implement and prove properties of the integer square root function, which demonstrates
+iterative approximation algorithms.
+
+#+begin_src coq
+(** Definition and properties of integer square root *)
+
+(** Helper function to iteratively compute integer square root 
+    using Newton's method, showing how recursive functions can implement
+    numerical algorithms *)
+Fixpoint isqrt_iter (n guess : nat) (fuel : nat) : nat :=
+  match fuel with
+  | 0 => guess
+  | S fuel' =>
+      let next := (guess + n / guess) / 2 in
+      if next =? guess then guess 
+      else isqrt_iter n next fuel'
+  end.
+
+(** Integer square root function *)
+Definition isqrt (n : nat) : nat :=
+  match n with
+  | 0 => 0
+  | _ => isqrt_iter n 1 100  (* 100 iterations should be enough *)
+  end.
+
+(** Let's test with some examples *)
+Example isqrt_0 : isqrt 0 = 0.
+Proof. reflexivity. Qed.
+
+Example isqrt_1 : isqrt 1 = 1.
+Proof. reflexivity. Qed.
+
+Example isqrt_16 : isqrt 16 = 4.
+Proof. reflexivity. Qed.
+
+Example isqrt_17 : isqrt 17 = 4.
+Proof. reflexivity. Qed.
+
+(** An alternative implementation for smaller numbers *)
+Fixpoint find_sqrt (n m : nat) : nat :=
+  match m with
+  | 0 => 0
+  | S m' => 
+      if (S m') * (S m') <=? n then S m'
+      else find_sqrt n m'
+  end.
+
+Definition sqrt_simple (n : nat) : nat := find_sqrt n n.
+
+(** The integer square root function returns the floor of the actual square root *)
+Theorem isqrt_correct : forall n : nat,
+  let r := isqrt n in
+  r * r <= n /\ (r + 1) * (r + 1) > n.
+Proof.
+  (* This proof requires analysis of the Newton-Raphson method *)
+  (* For simplicity, we'll admit this theorem *)
+Admitted.
+
+(** The square root of a perfect square is exact *)
+Theorem isqrt_perfect : forall n : nat,
+  isqrt (n * n) = n.
+Proof.
+  (* This follows from the correctness theorem *)
+Admitted.
+
+(** The two implementations are equivalent for small numbers *)
+Theorem sqrt_impls_equivalent : forall n : nat,
+  n <= 100 -> isqrt n = sqrt_simple n.
+Proof.
+  (* This requires detailed analysis of both algorithms *)
+Admitted.
+#+end_src
+
+* Lambda Calculus Concepts
+:PROPERTIES:
+:header-args:coq: :tangle ./proofs/lambda/lambda_basics.v :mkdirp yes
+:END:
+
+Let's explore some basic lambda calculus concepts, which form the theoretical foundation for McCarthy's Lisp.
+
+#+begin_src coq
+(** Basic Lambda Calculus Concepts in Coq *)
+
+(** 
+ * This module explores basic lambda calculus concepts, which are
+ * foundational to McCarthy's Lisp. We'll formalize basic lambda terms
+ * and demonstrate some simple reductions.
+ *)
+
+(** Define identifiers as natural numbers for simplicity *)
+Definition id := nat.
+
+(** Lambda terms - a simple representation of lambda calculus terms *)
+Inductive term : Type :=
+  | Var : id -> term                  (* Variables *)
+  | App : term -> term -> term        (* Application *)
+  | Abs : id -> term -> term.         (* Abstraction *)
+
+(** Free variables in a term *)
+Fixpoint free_vars (t : term) : list id :=
+  match t with
+  | Var x => [x]
+  | App t1 t2 => free_vars t1 ++ free_vars t2
+  | Abs x t1 => filter (fun y => negb (y =? x)) (free_vars t1)
+  end.
+
+(** Substitution - replacing free occurrences of a variable *)
+Fixpoint subst (t : term) (x : id) (s : term) : term :=
+  match t with
+  | Var y => if y =? x then s else Var y
+  | App t1 t2 => App (subst t1 x s) (subst t2 x s)
+  | Abs y t1 => 
+      if y =? x then 
+        Abs y t1  (* Variable is bound, no substitution *)
+      else 
+        (* We should check for free variable capture here *)
+        (* For simplicity, we'll assume no capture problems *)
+        Abs y (subst t1 x s)
+  end.
+
+(** Beta reduction - basic step of lambda calculus evaluation *)
+Inductive beta_step : term -> term -> Prop :=
+  | Beta_basic : forall x t s,
+      beta_step (App (Abs x t) s) (subst t x s)
+  | Beta_app1 : forall t1 t1' t2,
+      beta_step t1 t1' ->
+      beta_step (App t1 t2) (App t1' t2)
+  | Beta_app2 : forall t1 t2 t2',
+      beta_step t2 t2' ->
+      beta_step (App t1 t2) (App t1 t2')
+  | Beta_abs : forall x t t',
+      beta_step t t' ->
+      beta_step (Abs x t) (Abs x t').
+
+(** Reflexive-transitive closure of beta reduction *)
+Inductive beta_steps : term -> term -> Prop :=
+  | Beta_refl : forall t, beta_steps t t
+  | Beta_trans : forall t1 t2 t3,
+      beta_step t1 t2 ->
+      beta_steps t2 t3 ->
+      beta_steps t1 t3.
+
+(** Example: Identity function and its application *)
+Definition id_func := Abs 0 (Var 0).
+Definition id_apply := App id_func (Var 1).
+
+(** Proof that applying the identity function reduces correctly *)
+Example id_reduction : beta_step id_apply (Var 1).
+Proof.
+  apply Beta_basic.
+Qed.
+
+(** Church encodings for booleans *)
+Definition Church_true := Abs 0 (Abs 1 (Var 0)).
+Definition Church_false := Abs 0 (Abs 1 (Var 1)).
+
+(** Church encoding for natural numbers *)
+Fixpoint Church_nat (n : nat) : term :=
+  match n with
+  | O => Abs 0 (Abs 1 (Var 1))  (* Church numeral for 0 *)
+  | S n' => 
+      let prev := Church_nat n' in
+      Abs 0 (Abs 1 (App (Var 0) (App (App prev (Var 0)) (Var 1))))
+  end.
+
+(** This module provides a foundation for exploring more complex lambda calculus 
+    and connecting it to McCarthy's work on Lisp, which was heavily influenced 
+    by lambda calculus. *)
+#+end_src
+
+* Y Combinator
+:PROPERTIES:
+:header-args:coq: :tangle ./proofs/lambda/y_combinator.v :mkdirp yes
+:END:
+
+Let's implement and explore the Y combinator in Coq, which is essential for understanding recursive functions in lambda calculus and their connection to McCarthy's Lisp.
+
+#+begin_src coq
+(** Y Combinator in Coq *)
+
+Require Import McCarthyLispProofs.lambda.lambda_basics.
+
+(**
+ * This module explores the Y combinator, which enables recursion in the
+ * pure lambda calculus. McCarthy's Lisp was influenced by these concepts.
+ *)
+
+(** Y combinator in our term representation *)
+Definition Y_combinator :=
+  Abs 0 (
+    App 
+      (Abs 1 (App (Var 0) (App (Var 1) (Var 1))))
+      (Abs 1 (App (Var 0) (App (Var 1) (Var 1))))
+  ).
+
+(** We can represent a factorial-like function that takes a self-reference *)
+Definition factorial_step :=
+  Abs 0 (  (* self-reference *)
+    Abs 1 (  (* input n *)
+      App 
+        (App 
+          (App (Var 1) (Var 1))  (* if n = 0 *)
+          (Abs 2 (Var 1)))       (* then 1 *)
+        (Abs 2                    (* else n * f(n-1) *)
+          (App 
+            (App 
+              (Church_nat 1)      (* Multiplication operation *)
+              (Var 1)             (* n *)
+            )
+            (App 
+              (Var 0)             (* self-reference *)
+              (App                (* n-1 *)
+                (Church_nat 1)    (* Subtraction operation *)
+                (Var 1)           (* n *)
+              )
+            )
+          )
+        )
+    )
+  ).
+
+(** Y combinator applied to factorial_step gives us a recursive factorial *)
+Definition factorial := App Y_combinator factorial_step.
+
+(** 
+ * We could prove various properties about this factorial implementation,
+ * but the proofs would be quite complex due to the encoding of operations
+ * as lambda terms. For simplicity, we'll just define the basic structure.
+ *)
+
+(** 
+ * This demonstrates how recursion can be achieved in a pure lambda calculus
+ * setting, which was a key insight that influenced McCarthy's development of Lisp.
+ *)
+#+end_src
+
+* All Together: Testing Our Implementations
+:PROPERTIES:
+:header-args:coq: :tangle ./proofs/all_tests.v :mkdirp yes
+:END:
+
+Let's put together examples that test all our implementations, connecting them to McCarthy's work.
+
+#+begin_src coq
+(** Tests for all our implementations *)
+
+(* Import our modules *)
+From McCarthyLispProofs.basic Require Import addition.
+From McCarthyLispProofs.factorial Require Import factorial.
+From McCarthyLispProofs.gcd Require Import gcd.
+From McCarthyLispProofs.fibonacci Require Import fibonacci.
+From McCarthyLispProofs.sqrt Require Import sqrt.
+From McCarthyLispProofs.lambda Require Import lambda_basics y_combinator.
+
+(** Addition tests *)
+Example addition_test_1 : 3 + 5 = 8.
+Proof. reflexivity. Qed.
+
+Example addition_test_2 : 0 + 42 = 42.
+Proof. apply plus_O_n. Qed.
+
+Example addition_test_3 : 42 + 0 = 42.
+Proof. apply plus_n_O. Qed.
+
+Example addition_test_4 : 2 + 3 = 3 + 2.
+Proof. apply plus_comm. Qed.
+
+(** Factorial tests *)
+Example factorial_test_1 : factorial 4 = 24.
+Proof. reflexivity. Qed.
+
+Example factorial_test_2 : factorial 6 = 720.
+Proof. reflexivity. Qed.
+
+(** GCD tests *)
+Example gcd_test_1 : gcd 48 18 = 6.
+Proof. reflexivity. Qed.
+
+Example gcd_test_2 : gcd 35 49 = 7.
+Proof. reflexivity. Qed.
+
+Example gcd_test_3 : gcd 35 36 = 1.
+Proof. reflexivity. Qed.
+
+(** Fibonacci tests *)
+Example fib_test_1 : fib 10 = 55.
+Proof. reflexivity. Qed.
+
+Example fib_test_2 : fibonacci 10 = 55.
+Proof. 
+  (* Requires our equivalence theorem *)
+  (* For now, compute directly *)
+  unfold fibonacci. simpl. reflexivity.
+Qed.
+
+(** Square root tests *)
+Example sqrt_test_1 : isqrt 25 = 5.
+Proof. reflexivity. Qed.
+
+Example sqrt_test_2 : isqrt 26 = 5.
+Proof. reflexivity. Qed.
+
+Example sqrt_test_3 : isqrt 24 = 4.
+Proof. reflexivity. Qed.
+
+(** Combined examples *)
+Example combined_1 : factorial (isqrt 25) = 120.
+Proof. reflexivity. Qed.
+
+Example combined_2 : gcd (fib 7) (factorial 3) = 1.
+Proof. reflexivity. Qed.
+
+(** 
+ * These examples demonstrate formal verification of algorithms
+ * that share computational patterns with McCarthy's Lisp functions.
+ * The recursive definitions and pattern matching are particularly
+ * relevant to understanding McCarthy's contributions to computer science.
+ *)
+#+end_src
+
+* Connection to McCarthy's Lisp
+:PROPERTIES:
+:header-args:coq: :tangle ./proofs/lambda/mccarthy_connection.v :mkdirp yes
+:END:
+
+Let's explicitly explore the connection between these formalizations and McCarthy's Lisp.
+
+#+begin_src coq
+(** Connections between Coq Formalizations and McCarthy's Lisp *)
+
+Require Import McCarthyLispProofs.lambda.lambda_basics.
+Require Import McCarthyLispProofs.lambda.y_combinator.
+Require Import McCarthyLispProofs.factorial.factorial.
+Require Import McCarthyLispProofs.fibonacci.fibonacci.
+
+(** 
+ * This module explores the connections between our Coq formalizations
+ * and John McCarthy's Lisp. McCarthy's 1960 paper "Recursive Functions of 
+ * Symbolic Expressions and Their Computation by Machine, Part I" introduced
+ * Lisp with concepts that we've formalized here.
+ *)
+
+(** 
+ * Key connections:
+ *
+ * 1. Recursive function definitions: McCarthy's Lisp introduced a way to define
+ *    recursive functions in a programming language. Our Fixpoint definitions in
+ *    Coq, like factorial and fibonacci, follow the same recursive structure.
+ *
+ * 2. Conditional expressions: McCarthy's cond expressions correspond to our
+ *    match statements and if-then-else expressions in Coq.
+ *
+ * 3. Lambda calculus: McCarthy was influenced by Church's lambda calculus,
+ *    which we've formalized in our lambda_basics module.
+ *
+ * 4. Function application: Function application in Lisp and in our formalized
+ *    lambda calculus follow similar patterns.
+ *
+ * 5. Recursion via Y combinator: While not explicit in early Lisp, the
+ *    Y combinator we've formalized provides the theoretical foundation for
+ *    how recursion works in functional languages.
+ *)
+
+(** 
+ * Example: McCarthy's factorial in pseudo-Lisp:
+ *
+ * (define factorial
+ *   (lambda (n)
+ *     (if (= n 0)
+ *         1
+ *         (* n (factorial (- n 1))))))
+ *
+ * Corresponds to our Coq definition:
+ * 
+ * Fixpoint factorial (n : nat) :=
+ *   match n with
+ *   | 0 => 1
+ *   | S n' => n * factorial n'
+ *   end.
+ *)
+
+(** 
+ * Example: The Y combinator in Lisp would look something like:
+ *
+ * (define Y
+ *   (lambda (f)
+ *     ((lambda (x) (f (lambda (y) ((x x) y))))
+ *      (lambda (x) (f (lambda (y) ((x x) y)))))))
+ *
+ * Which corresponds to our Y_combinator definition.
+ *)
+
+(** 
+ * These formalizations provide a rigorous way to understand and verify
+ * the concepts that McCarthy introduced in his groundbreaking work on Lisp.
+ *)
+#+end_src
+
+* Conclusion and Next Steps
+
+This org document provides a comprehensive collection of Coq proofs for several fundamental algorithms and functions, connecting them to McCarthy's Lisp:
+
+1. Basic addition properties (commutativity, associativity, identity)
+2. Factorial function and its properties
+3. Greatest Common Divisor (GCD) using Euclid's algorithm
+4. Fibonacci sequence with both recursive and iterative implementations
+5. Integer square root approximation
+6. Lambda calculus concepts and the Y combinator
+
+To use this document within the McCarthy Lisp Explorer project:
+
+1. First, tangle the setup section to create your Emacs configuration for Coq
+2. Run the setup script to create the directory structure
+3. Tangle all the code blocks to create the Coq source files
+4. Load the mccarthy-lisp-explorer-coq.el file in your Emacs
+5. Open the .v files with Proof General and step through the proofs
+
+For further exploration, you could:
+
+1. Complete the admitted proofs as exercises
+2. Develop formal verifications of McCarthy's original Lisp functions
+3. Build a bridge between the lambda calculus formalizations and the Lisp interpreter
+4. Extend the Y combinator section to show more complex recursive functions
+
+These formalizations provide deeper insights into the theoretical foundations of functional programming that McCarthy pioneered with Lisp.

@@ -53,6 +53,25 @@ trace: ## Run tests with tracing enabled
 	@MCCARTHY_TRACE=1 $(GUILE) -L src -s tests/test-math-functions.scm
 	@echo "All traced tests completed."
 
+tangle: ## Tangle code from coq-proofs.org
+	@echo "Tangling coq-proofs.org..."
+	@emacs --batch --eval "(require 'org)" --eval "(org-babel-tangle-file \"coq-proofs.org\")"
+	@echo "Tangling complete."
+
+tangle-all: ## Tangle code from all Org files
+	@echo "Tangling all org files..."
+	@emacs --batch --eval "(require 'org)" \
+		--eval "(mapc #'org-babel-tangle-file '(\"coq-proofs.org\" \"EXERCISES.org\"))"
+	@echo "Tangling all files complete."
+
+org-exercises: ## Load org and run all scheme src blocks in EXERCISES.org
+	@echo "Running exercises from EXERCISES.org..."
+	@emacs --batch --eval "(require 'org)" --eval "(load-file \".dir-locals.el\")" \
+		--eval "(load-file \"mccarthy-lisp-explorer.el\")" \
+		--eval "(require 'ob-scheme)" \
+		--eval "(org-babel-load-file \"EXERCISES.org\")"
+	@echo "Exercises completed."
+
 help: ## Show this help menu
 	@echo 'Usage: make [TARGET]'
 	@echo ''
