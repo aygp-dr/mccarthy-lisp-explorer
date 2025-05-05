@@ -1,82 +1,116 @@
-# Implementation Guide
+# McCarthy Lisp Explorer Implementation Guide
 
-This document explains our implementation of McCarthy's LISP evaluator using Guile Scheme.
+This document describes how the implementation in this repository corresponds to McCarthy's 1960 paper "Recursive Functions of Symbolic Expressions and Their Computation by Machine, Part I."
 
-## Setup
+## Design Philosophy
 
-First, ensure you have Guile Scheme installed:
+Our implementation follows several key principles:
 
-```bash
-# On Debian/Ubuntu
-sudo apt install guile-3.0
+1. **Fidelity to the original paper** - We strive to implement the functions exactly as McCarthy described them, using the same names and semantics.
+2. **Clarity over efficiency** - We prioritize readability and understanding over performance.
+3. **Minimalism** - We implement only what's necessary to demonstrate the core concepts.
+4. **Pedagogical value** - The code should help readers understand McCarthy's paper.
 
-# On macOS with Homebrew
-brew install guile
+## Core Implementation
 
-# On Windows via MSYS2
-pacman -S mingw-w64-x86_64-guile
-```
+The core implementation is found in `src/ap/mccarthy/core-functions.scm`. This file implements:
 
-## Running the Examples
+### Five Elementary Functions (Section 3c)
 
-Each example file can be run directly with Guile:
+McCarthy's paper defines five basic operations on S-expressions:
 
-```bash
-guile examples/hello-world.scm
-guile examples/factorial.scm
-guile examples/mccarthy-examples.scm
-```
+1. `atom?` - Tests if an expression is an atomic symbol
+2. `eq?` - Tests if two atomic symbols are identical
+3. `car` - Returns the first element of a list
+4. `cdr` - Returns the rest of a list
+5. `cons` - Constructs a new list by adding an element to the front
 
-## Structure of the Implementation
+Our implementation provides these exactly as McCarthy described them.
 
-Our implementation follows McCarthy's paper closely but uses Scheme's native syntax and features when convenient.
+### Higher-level Functions (Section 3d)
 
-### S-expressions (s-expressions.scm)
+The paper defines several useful functions built on top of the primitives:
 
-This file defines McCarthy's five primitive operations:
-- `mccarthy-atom?`
-- `mccarthy-eq?`
-- `mccarthy-car`
-- `mccarthy-cdr`
-- `mccarthy-cons`
+- `null?` - Tests if a list is empty
+- `equal?` - Tests if two S-expressions are structurally identical
+- `append` - Joins two lists
+- `pair` - Creates a list of pairs
+- `assoc` - Finds an association in an association list
 
-### Core Functions (core.scm)
+### Mathematical Functions (Section 3e)
 
-This file implements higher-level functions from the paper:
-- `sublis` (substitution)
-- `mccarthy-null?`
-- `mccarthy-equal?`
-- `mccarthy-append`
-- `mccarthy-pair`
-- Association list functions
+McCarthy demonstrates the power of recursive definitions with several mathematical functions:
 
-### Evaluator (evaluator.scm)
+- `factorial` - Computes the factorial of a number
+- `gcd-recursive` - Computes the greatest common divisor
+- `sqrt-approx` - Approximates the square root using Newton's method
 
-This file implements the eval/apply evaluator from section 4 of the paper:
-- `eval` - Evaluates expressions
+## Universal Evaluator
+
+The universal evaluator, described in Section 4, is implemented in `src/ap/mccarthy/evaluator.scm`. This includes:
+
+- `eval` - Evaluates S-expressions
 - `apply` - Applies functions to arguments
-- `evcon` - Evaluates conditionals
-- `evlis` - Evaluates lists of expressions
+- `evlis` - Evaluates a list of expressions
+- `evcon` - Evaluates conditional expressions
 
-## Key Differences from McCarthy's Original
-
-1. **Scheme vs. M-expressions**: McCarthy used M-expression syntax, while we use Scheme's S-expression syntax.
-2. **Built-in Functions**: We use some of Scheme's built-in functions for convenience.
-3. **Error Handling**: We've added error messages that weren't in the original.
-4. **Environment**: Our environment structure is slightly different.
+The evaluator demonstrates how Lisp can interpret programs represented as S-expressions.
 
 ## Implementation Notes
 
-- McCarthy's approach is surprisingly simple yet powerful.
-- The eval/apply recursion beautifully demonstrates how a language can evaluate itself.
-- The core insight of treating code as data via S-expressions remains revolutionary.
-- The evaluator is a complete implementation of a Lisp-like language in just a few dozen lines of code.
+### Differences from McCarthy's Paper
 
-## Extending the Implementation
+While we strive for fidelity, a few differences exist:
 
-To extend this implementation:
-1. Add more primitive functions to the `primitive-functions` list
-2. Implement macros as described in later Lisp papers
-3. Add a proper lexical scope mechanism
-4. Implement a garbage collector
-5. Add a reader/printer to parse and display S-expressions
+1. **Error handling** - We provide better error messages than would have been possible in 1960.
+2. **Guile features** - We use Guile Scheme's module system for organization.
+3. **Tracing support** - We add tracing features for educational purposes.
+
+### Extending the Implementation
+
+This implementation can be extended in several ways:
+
+1. Add more functions from LISP 1.5
+2. Implement property lists for symbols
+3. Add a simple compiler to lower-level operations
+4. Create a reader for textual S-expressions
+
+## Using the Implementation
+
+### Basic Usage
+
+```scheme
+(use-modules (ap mccarthy))
+
+;; Use the five primitives
+(atom? 'A)              ; => #t
+(eq? 'A 'A)             ; => #t
+(car '(A B C))          ; => A
+(cdr '(A B C))          ; => (B C)
+(cons 'A '(B C))        ; => (A B C)
+
+;; Use higher-level functions
+(equal? '(A B C) '(A B C))  ; => #t
+(append '(A B) '(C D))      ; => (A B C D)
+
+;; Use the evaluator
+(eval '(car '(A B C)) '())  ; => A
+```
+
+### Tracing
+
+Enable tracing to see how recursive functions work:
+
+```scheme
+(trace-on)
+(factorial 5)  ; Shows the recursive steps
+(trace-off)
+```
+
+## Related Files
+
+- `examples/hello-world.scm` - Simple introduction to S-expressions
+- `examples/factorial.scm` - Implementation of factorial
+- `examples/math-functions.scm` - Mathematical functions from Section 3
+- `examples/mccarthy-examples.scm` - Direct examples from the paper
+- `interactive-examples.scm` - Interactive tour of the key concepts

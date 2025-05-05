@@ -1,16 +1,63 @@
+---
+title: McCarthy Lisp Explorer - Project Structure
+---
 graph TD
-    A[symbolic-recursion-study] --> B[src]
-    B --> C[core.scm]
-    B --> D[s-expressions.scm]
-    B --> E[evaluator.scm]
-    B --> F[primitives.scm]
-    A --> G[examples]
-    G --> H[hello-world.scm]
-    G --> I[factorial.scm]
-    G --> J[mccarthy-examples.scm]
-    A --> K[tests]
-    K --> L[test-core.scm]
-    K --> M[test-evaluator.scm]
-    A --> N[docs]
-    N --> O[mccarthy-paper-notes.md]
-    N --> P[implementation-guide.md]
+    A[McCarthy Lisp Explorer] --> B[src/]
+    A --> C[examples/]
+    A --> D[tests/]
+    A --> E[docs/]
+    A --> F[resources/]
+    
+    B --> B1[ap/mccarthy/core-functions.scm]
+    B --> B2[ap/mccarthy/evaluator.scm]
+    B --> B3[ap/mccarthy.scm]
+    
+    C --> C1[hello-world.scm]
+    C --> C2[factorial.scm]
+    C --> C3[math-functions.scm]
+    C --> C4[mccarthy-examples.scm]
+    
+    D --> D1[test-core.scm]
+    D --> D2[test-evaluator.scm]
+    D --> D3[test-math-functions.scm]
+    
+    E --> E1[mccarthy-paper-notes.md]
+    E --> E2[implementation-guide.md]
+    E --> E3[project-structure.mmd]
+    E --> E4[workshop-schedule.md]
+    
+    F --> F1[recursive.pdf]
+    
+    G[Main Files] --> G1[README.org]
+    G --> G2[READING_GUIDE.org]
+    G --> G3[EXERCISES.org]
+    G --> G4[run-all.scm]
+    G --> G5[interactive-examples.scm]
+    G --> G6[Makefile]
+
+    %% Core functions explanation
+    subgraph "Core Implementation"
+        B1 -->|"Implements"| H1[Five Primitives]
+        B1 -->|"Implements"| H2[Higher-level Functions]
+        B1 -->|"Implements"| H3[Mathematical Functions]
+        H1 -->|"Contains"| I1[atom?]
+        H1 -->|"Contains"| I2[eq?]
+        H1 -->|"Contains"| I3[car]
+        H1 -->|"Contains"| I4[cdr]
+        H1 -->|"Contains"| I5[cons]
+        H2 -->|"Contains"| J1[equal?]
+        H2 -->|"Contains"| J2[append]
+        H2 -->|"Contains"| J3[pair]
+        H3 -->|"Contains"| K1[factorial]
+        H3 -->|"Contains"| K2[gcd-recursive]
+        H3 -->|"Contains"| K3[sqrt-approx]
+    end
+    
+    %% Evaluator explanation
+    subgraph "Evaluator"
+        B2 -->|"Implements"| L1[Universal Evaluator]
+        L1 -->|"Contains"| M1[eval]
+        L1 -->|"Contains"| M2[apply]
+        L1 -->|"Contains"| M3[evlis]
+        L1 -->|"Contains"| M4[evcon]
+    end
