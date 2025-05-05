@@ -1,1 +1,24 @@
-**/.claude/settings.local.json
+# Guile Compilation Files
+*.go
+
+# Emacs backup and temporary files
+*~
+\#*\#
+.\#*
+.dir-locals.el
+
+# OS Generated Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Claude temporary files
+.claude/
+
+# Build directories
+/build
+/dist
