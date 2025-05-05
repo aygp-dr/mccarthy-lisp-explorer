@@ -1,6 +1,6 @@
 #+TITLE: McCarthy's Lisp Explorer
-#+AUTHOR: Aidan Pace <apace@defrecord.com>
-#+DATE: [2025-05-04 Sun]
+#+AUTHOR: Aidan Pace <apace@defrecord.com>, Jason Walsh <j@wal.sh>
+#+DATE: [2025-05-05 Mon]
 
 * Introduction
 
@@ -44,7 +44,10 @@ The repository is organized as follows:
 ** Prerequisites
 
 - GNU Guile Scheme (3.0 or later recommended)
-- Make (for using the Makefile)
+- GNU Make (for using the Makefile)
+- Coq (for formal verification)
+- Emacs (for org-mode files and tangling)
+- pdfpc (optional, for presenting slides)
 
 ** Setup
 
@@ -52,13 +55,13 @@ The repository is organized as follows:
 2. Run the setup target to download McCarthy's paper and create the directories:
 
 #+begin_src bash
-make setup
+gmake setup
 #+end_src
 
 3. Verify the implementation:
 
 #+begin_src bash
-./run-all.scm
+gmake run-all
 #+end_src
 
 * Learning Path
@@ -90,12 +93,35 @@ The =interactive-examples.scm= script demonstrates the key concepts from McCarth
 Run it with:
 
 #+begin_src bash
-guile interactive-examples.scm
+gmake examples
+#+end_src
+
+Or to run a specific example:
+
+#+begin_src bash
+gmake GUILE_SCRIPT=interactive-examples.scm run-script
 #+end_src
 
 ** Exercises
 
 The =EXERCISES.org= file contains a series of exercises, from beginner to advanced, to help you deepen your understanding of McCarthy's Lisp. Work through these exercises to gain mastery of the concepts.
+
+You can run the exercises with:
+
+#+begin_src bash
+gmake org-exercises
+#+end_src
+
+** Running Tests
+
+You can run the tests to verify the implementation:
+
+#+begin_src bash
+gmake test            # Run all tests (Scheme and Coq)
+gmake scheme-test     # Run only Scheme tests
+gmake coq-test        # Run only Coq tests
+gmake trace           # Run tests with tracing enabled
+#+end_src
 
 * Implementation Notes
 
@@ -105,11 +131,22 @@ This implementation focuses on clarity rather than efficiency, prioritizing a di
 - We use dotted-pair notation for S-expressions, as in the original paper
 - The universal evaluator (eval/apply) is implemented as described in section 3f
 
+** Presentation
+
+The repository includes a presentation that can be used for teaching about McCarthy's Lisp. You can:
+
+#+begin_src bash
+gmake presentation.pdf  # Build the presentation PDF
+gmake present           # Start the presentation (uses pdfpc if available)
+gmake presentation-tangle # Tangle code blocks from the presentation
+#+end_src
+
 * References
 
 - McCarthy, J. (1960). Recursive Functions of Symbolic Expressions and Their Computation by Machine, Part I.
 - McCarthy, J. (1978). History of LISP. ACM SIGPLAN Notices, 13(8), 217-223.
 - Graham, P. (2008). The Roots of Lisp.
+- Abelson, H., & Sussman, G. J. (1996). Structure and Interpretation of Computer Programs.
 
 * License
 

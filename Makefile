@@ -68,6 +68,15 @@ examples: ## Run example code
 	@$(GUILE) -L src -s examples/mccarthy-1960.scm
 	@echo "All examples completed."
 
+run-script: ## Run a specific Guile script (use GUILE_SCRIPT=path/to/script.scm)
+	@if [ -z "$(GUILE_SCRIPT)" ]; then \
+		echo "Error: GUILE_SCRIPT is not set. Usage: make GUILE_SCRIPT=path/to/script.scm run-script"; \
+		exit 1; \
+	fi
+	@echo "Running $(GUILE_SCRIPT)..."
+	@$(GUILE) -L src -s $(GUILE_SCRIPT)
+	@echo "Script execution completed."
+
 trace: ## Run Scheme tests with tracing enabled
 	@echo "Running Scheme tests with tracing..."
 	@MCCARTHY_TRACE=1 $(GUILE) -L src -s tests/test-core.scm
