@@ -2,8 +2,6 @@
 ;;
 ;; Tests for factorial, GCD, and sqrt functions from McCarthy's paper section 3
 
-(add-to-load-path "..")
-
 (use-modules (ap mccarthy))
 
 (load "../examples/math-functions.scm")

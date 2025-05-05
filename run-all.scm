@@ -2,7 +2,7 @@
 !#
 
 ;; Add our source directory to the load path
-(add-to-load-path ".")
+;; (add-to-load-path is no longer needed with -L option)
 
 ;;; run-all.scm -- Run all tests and examples
 ;;;

@@ -3,9 +3,6 @@
 ;; Implementation of factorial, GCD, and sqrt-approximation as described
 ;; in McCarthy's 1960 paper, section 3.
 
-;; Add our source directory to the load path
-(add-to-load-path "..")
-
 (use-modules (ap mccarthy))
 
 ;; Turn on tracing if environment variable is set

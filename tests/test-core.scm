@@ -2,8 +2,6 @@
 ;;
 ;; This file tests the basic functions defined in core-functions.scm
 
-(add-to-load-path "..")
-
 (use-modules (ap mccarthy core-functions))
 
 (display "Running core function tests...\n")

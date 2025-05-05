@@ -2,8 +2,6 @@
 ;;
 ;; Tests McCarthy's universal evaluator
 
-(add-to-load-path "..")
-
 (use-modules (ap mccarthy core-functions)
              (ap mccarthy evaluator))
 
