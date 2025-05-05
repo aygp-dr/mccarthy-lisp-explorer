@@ -3,9 +3,11 @@
 
 # Emacs backup and temporary files
 *~
+*.*~
 \#*\#
 .\#*
 .dir-locals.el
+auto-save-list/
 
 # OS Generated Files
 .DS_Store
