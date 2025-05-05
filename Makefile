@@ -66,8 +66,7 @@ tangle-all: ## Tangle code from all Org files
 
 org-exercises: ## Load org and run all scheme src blocks in EXERCISES.org
 	@echo "Running exercises from EXERCISES.org..."
-	@emacs --batch --eval "(require 'org)" --eval "(load-file \".dir-locals.el\")" \
-		--eval "(load-file \"mccarthy-lisp-explorer.el\")" \
+	@emacs --batch --eval "(require 'org)" \
 		--eval "(require 'ob-scheme)" \
 		--eval "(org-babel-load-file \"EXERCISES.org\")"
 	@echo "Exercises completed."
