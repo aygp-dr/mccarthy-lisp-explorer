@@ -45,13 +45,21 @@ setup: src examples-dir tests docs resources/recursive.pdf ## Setup the project 
 clean: ## Clean the resources
 	rm -rf resources/*.pdf
 
-test: ## Run the tests
-	@echo "Running tests..."
+test: scheme-test coq-test ## Run all tests (Scheme and Coq)
+	@echo "All tests completed."
+
+scheme-test: ## Run Scheme tests
+	@echo "Running Scheme tests..."
 	@$(GUILE) -L src -s tests/test-core.scm
 	@$(GUILE) -L src -s tests/test-evaluator.scm
 	@$(GUILE) -L src -s tests/test-math-functions.scm
 	@$(GUILE) -L src -s tests/test-mccarthy-functions.scm
-	@echo "All tests completed."
+	@echo "Scheme tests completed."
+
+coq-test: ## Run Coq proofs
+	@echo "Running Coq proofs..."
+	@cd proofs && bash ./setup.sh && coqc all_tests.v
+	@echo "Coq proofs completed."
 
 examples: ## Run example code
 	@echo "Running examples..."
@@ -60,8 +68,8 @@ examples: ## Run example code
 	@$(GUILE) -L src -s examples/mccarthy-1960.scm
 	@echo "All examples completed."
 
-trace: ## Run tests with tracing enabled
-	@echo "Running tests with tracing..."
+trace: ## Run Scheme tests with tracing enabled
+	@echo "Running Scheme tests with tracing..."
 	@MCCARTHY_TRACE=1 $(GUILE) -L src -s tests/test-core.scm
 	@MCCARTHY_TRACE=1 $(GUILE) -L src -s tests/test-evaluator.scm
 	@MCCARTHY_TRACE=1 $(GUILE) -L src -s tests/test-math-functions.scm
