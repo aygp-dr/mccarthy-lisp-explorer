@@ -64,12 +64,35 @@ FUNC-NAME is the name of the function to insert."
     (setq-local geiser-guile-binary "guile3")
     (setq-local geiser-active-implementations '(guile))))
 
+(defun mccarthy-lisp-explorer-setup-org-babel ()
+  "Set up org-babel for McCarthy Lisp Explorer."
+  (when (featurep 'org)
+    ;; Configure org-babel languages
+    (org-babel-do-load-languages
+     'org-babel-load-languages
+     '((scheme . t)
+       (shell . t)
+       (emacs-lisp . t)
+       (coq . t)))
+    
+    ;; Configure Org mode
+    (setq org-confirm-babel-evaluate nil)
+    (setq org-src-fontify-natively t)
+    (setq org-src-tab-acts-natively t)))
+
+(defun mccarthy-lisp-explorer-setup-proof-general ()
+  "Set up Proof General for Coq integration."
+  (when (featurep 'proof-general)
+    (setq proof-three-window-mode-policy 'hybrid)))
+
 ;;;###autoload
 (define-minor-mode mccarthy-lisp-explorer-mode
   "Minor mode for exploring McCarthy's original Lisp concepts."
   :lighter " McCarthyLisp"
   :keymap mccarthy-lisp-explorer-mode-map
-  (mccarthy-lisp-explorer-setup-geiser))
+  (mccarthy-lisp-explorer-setup-geiser)
+  (mccarthy-lisp-explorer-setup-org-babel)
+  (mccarthy-lisp-explorer-setup-proof-general))
 
 (provide 'mccarthy-lisp-explorer)
 ;;; mccarthy-lisp-explorer.el ends here
