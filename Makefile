@@ -94,8 +94,27 @@ org-exercises: ## Load org and run all scheme src blocks in EXERCISES.org
 		--eval "(with-temp-buffer (insert-file-contents \"EXERCISES.org\") (org-mode) (org-babel-execute-buffer))"
 	@echo "Exercises completed."
 
-presentation.pdf: presentation.org ## McCarthy ...
-	@echo "Slides built"
+presentation.pdf: presentation.org citations.bib ## Generate presentation slides
+	@echo "Building presentation slides..."
+	@emacs --batch --eval "(require 'org)" --eval "(require 'ox-beamer)" \
+		--visit=presentation.org --funcall org-beamer-export-to-pdf
+	@echo "Presentation PDF built successfully."
+
+present: presentation.pdf ## Present slides with pdfpc or fallback to PDF viewer
+	@echo "Starting presentation..."
+	@if command -v pdfpc >/dev/null 2>&1; then \
+		echo "Using pdfpc for presentation with notes..."; \
+		pdfpc -d 30 -s presentation.pdf || echo "pdfpc failed, please open the PDF manually"; \
+	else \
+		echo "pdfpc not found, opening with default PDF viewer..."; \
+		if command -v xdg-open >/dev/null 2>&1; then \
+			xdg-open presentation.pdf; \
+		elif command -v open >/dev/null 2>&1; then \
+			open presentation.pdf; \
+		else \
+			echo "Could not find a suitable PDF viewer. Please open presentation.pdf manually."; \
+		fi \
+	fi
 
 help: ## Show this help menu
 	@echo 'Usage: make [TARGET]'
