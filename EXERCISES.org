@@ -19,6 +19,50 @@ Write functions that perform the following using only the five primitive operati
 3. Create a list with three given elements
 4. Check if an element is a member of a list
 
+Sample solutions:
+
+#+begin_src scheme :exports both :results output
+;; 1. Return the second element of a list
+(define (second lst)
+  (car (cdr lst)))
+
+;; 2. Return the third element of a list
+(define (third lst)
+  (car (cdr (cdr lst))))
+
+;; 3. Create a list with three given elements
+(define (make-list3 a b c)
+  (cons a (cons b (cons c '()))))
+
+;; 4. Check if an element is a member of a list
+(define (member? x lst)
+  (cond
+    ((null? lst) #f)
+    ((eq? x (car lst)) #t)
+    (else (member? x (cdr lst)))))
+
+;; Test the functions
+(display "Second element of (1 2 3): ")
+(display (second '(1 2 3)))
+(newline)
+
+(display "Third element of (a b c d): ")
+(display (third '(a b c d)))
+(newline)
+
+(display "Creating list with three elements: ")
+(display (make-list3 'x 'y 'z))
+(newline)
+
+(display "Is 'b a member of '(a b c)? ")
+(display (member? 'b '(a b c)))
+(newline)
+
+(display "Is 'd a member of '(a b c)? ")
+(display (member? 'd '(a b c)))
+(newline)
+#+end_src
+
 ** Exercise 2: Implement Basic List Functions
 
 Implement the following list processing functions:
@@ -27,6 +71,53 @@ Implement the following list processing functions:
 2. =reverse= - Returns a list with elements in reverse order
 3. =last= - Returns the last element of a list
 4. =nth= - Returns the nth element of a list (0-indexed)
+
+Sample solutions:
+
+#+begin_src scheme :exports both :results output
+;; 1. Length of a list
+(define (length lst)
+  (if (null? lst)
+      0
+      (+ 1 (length (cdr lst)))))
+
+;; 2. Reverse a list
+(define (reverse lst)
+  (define (reverse-helper lst acc)
+    (if (null? lst)
+        acc
+        (reverse-helper (cdr lst) (cons (car lst) acc))))
+  (reverse-helper lst '()))
+
+;; 3. Last element of a list
+(define (last lst)
+  (if (null? (cdr lst))
+      (car lst)
+      (last (cdr lst))))
+
+;; 4. Nth element of a list (0-indexed)
+(define (nth n lst)
+  (if (= n 0)
+      (car lst)
+      (nth (- n 1) (cdr lst))))
+
+;; Test the functions
+(display "Length of (a b c d): ")
+(display (length '(a b c d)))
+(newline)
+
+(display "Reverse of (1 2 3 4): ")
+(display (reverse '(1 2 3 4)))
+(newline)
+
+(display "Last element of (w x y z): ")
+(display (last '(w x y z)))
+(newline)
+
+(display "Element at index 2 in (a b c d e): ")
+(display (nth 2 '(a b c d e)))
+(newline)
+#+end_src
 
 ** Exercise 3: Mathematical Functions
 
