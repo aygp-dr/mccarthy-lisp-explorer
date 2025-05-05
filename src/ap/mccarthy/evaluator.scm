@@ -5,7 +5,8 @@
 
 (define-module (ap mccarthy evaluator)
   #:use-module (ap mccarthy core-functions)
-  #:export (eval apply evlis evcon))
+  #:export (eval apply evlis evcon 
+            make-env extend-env lookup-var))
 
 ;; Our environment will contain primitive functions
 (define primitive-functions
@@ -16,7 +17,18 @@
     (eq . ,eq?)
     (null . ,null?)
     (equal . ,equal?)
-    (append . ,append)))
+    (append . ,append)
+    (subst . ,subst)
+    (member . ,member)
+    (apply-to-all . ,apply-to-all)
+    (assoc . ,assoc)
+    (+ . ,+)
+    (- . ,-)
+    (* . ,*)
+    (/ . ,/)
+    (< . ,<)
+    (> . ,>)
+    (= . ,=)))
 
 ;; ff (find function) - lookup values in an association list
 (define (ff x a)
@@ -64,6 +76,20 @@
 (define (apply-primitive fn args)
   (apply fn args))
 
+;; Environment helpers
+
+;; make-env: Creates a new environment with primitive bindings
+(define (make-env)
+  primitive-functions)
+
+;; extend-env: Adds new bindings to an environment
+(define (extend-env bindings env)
+  (append bindings env))
+
+;; lookup-var: Looks up a variable in an environment
+(define (lookup-var var env)
+  (ff var env))
+
 ;; eval - evaluates an expression in an environment (section 4)
 (define (eval expr a)
   (cond 
@@ -80,6 +106,24 @@
        ;; Cond - evaluate conditional
        ((eq? (car expr) 'cond)
         (evcon (cdr expr) a))
+       
+       ;; Define (extension for convenience)
+       ((eq? (car expr) 'define)
+        (let ((var (car (cdr expr)))
+              (val (eval (car (cdr (cdr expr))) a)))
+          (set! a (cons (list var val) a))
+          var))
+       
+       ;; Let (extension for convenience)
+       ((eq? (car expr) 'let)
+        (let* ((bindings (car (cdr expr)))
+               (body (car (cdr (cdr expr))))
+               (vars (apply-to-all car bindings))
+               (vals (apply-to-all 
+                       (lambda (b) (eval (car (cdr b)) a))
+                       bindings))
+               (new-env (extend-env (pair vars vals) a)))
+          (eval body new-env)))
        
        ;; Function application
        (else (apply (car expr)

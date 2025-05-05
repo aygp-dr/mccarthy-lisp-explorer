@@ -6,6 +6,7 @@
 (define-module (ap mccarthy core-functions)
   #:export (atom? eq? car cdr cons
             null? equal? append pair assoc list
+            apply-to-all subst member
             factorial gcd-recursive sqrt-approx
             trace-on trace-off))
 
@@ -96,6 +97,28 @@
   (cond ((null? a) #f)
         ((eq? (car (car a)) x) (car a))
         (else (assoc x (cdr a)))))
+
+;; apply-to-all (mapcar): Apply a function to each element of a list
+;; From McCarthy's paper (section 3)
+(define (apply-to-all fn x)
+  (cond ((null? x) '())
+        (else (cons (fn (car x)) 
+                    (apply-to-all fn (cdr x))))))
+
+;; subst: Substitutes y for all occurrences of x in z
+;; From McCarthy's paper (section 3)
+(define (subst x y z)
+  (cond ((eq? z x) y)
+        ((atom? z) z)
+        (else (cons (subst x y (car z))
+                    (subst x y (cdr z))))))
+
+;; member: Checks if x is a member of the list y
+;; From McCarthy's paper (section 3)
+(define (member x y)
+  (cond ((null? y) #f)
+        ((equal? x (car y)) #t)
+        (else (member x (cdr y)))))
 
 ;; ---- Mathematical functions (Section 3) ----
 
