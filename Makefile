@@ -1,6 +1,7 @@
-.PHONY: all clean resources
+.PHONY: all clean resources test
 
 GREP = ggrep
+GUILE = guile3
 
 all: help
 
@@ -26,6 +27,25 @@ setup: src examples tests docs resources/recursive.pdf ## Setup the project stru
 
 clean: ## Clean the resources
 	rm -rf resources/*.pdf
+
+test: ## Run the tests
+	@echo "Running tests..."
+	@$(GUILE) -s tests/test-core.scm
+	@$(GUILE) -s tests/test-evaluator.scm
+	@$(GUILE) -s tests/test-math-functions.scm
+	@echo "All tests completed."
+
+examples: ## Run example code
+	@echo "Running examples..."
+	@$(GUILE) -s examples/math-functions.scm
+	@echo "All examples completed."
+
+trace: ## Run tests with tracing enabled
+	@echo "Running tests with tracing..."
+	@MCCARTHY_TRACE=1 $(GUILE) -s tests/test-core.scm
+	@MCCARTHY_TRACE=1 $(GUILE) -s tests/test-evaluator.scm
+	@MCCARTHY_TRACE=1 $(GUILE) -s tests/test-math-functions.scm
+	@echo "All traced tests completed."
 
 help: ## Show this help menu
 	@echo 'Usage: make [TARGET]'

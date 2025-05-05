@@ -1,0 +1,71 @@
+# Notes on McCarthy's "Recursive Functions of Symbolic Expressions" Paper
+
+## Historical Context
+
+John McCarthy's 1960 paper "Recursive Functions of Symbolic Expressions and Their Computation by Machine, Part I" introduced the Lisp programming language and several fundamental concepts in computer science:
+
+- Symbolic computation
+- Recursive functions as a computation model
+- Self-evaluating code (code as data)
+- The universal "apply/eval" evaluator
+- Garbage collection
+
+## Key Concepts
+
+### S-expressions (Symbolic Expressions)
+
+S-expressions are the foundational data structure in Lisp. They are either:
+- Atomic symbols (like `A`, `B`, `FOO`)
+- Lists of S-expressions enclosed in parentheses: `(A B (C D) E)`
+
+McCarthy defines five primitive operations on S-expressions:
+1. `atom` - Tests if an expression is an atomic symbol
+2. `eq` - Tests if two atomic symbols are identical
+3. `car` - Returns the first element of a list
+4. `cdr` - Returns the list without its first element
+5. `cons` - Constructs a new list by adding an element to the front
+
+### M-expressions (Meta Expressions)
+
+McCarthy introduced M-expressions as a more readable syntax for writing Lisp functions. 
+For example, the M-expression `car[x]` corresponds to the S-expression `(car x)`.
+
+The paper uses M-expressions, but most Lisp implementations (including our Guile implementation) use S-expressions for both data and code.
+
+### Conditional Expressions
+
+McCarthy introduced conditional expressions with the syntax:
+```
+(cond (p₁ e₁) (p₂ e₂) ... (pₙ eₙ))
+```
+
+This evaluates predicates p₁, p₂, etc. in order until finding a true one, then returns the corresponding eᵢ.
+
+### Lambda Expressions
+
+McCarthy adapted the lambda calculus notation to define anonymous functions:
+```
+(lambda (var₁ ... varₙ) expr)
+```
+
+### Label Expressions
+
+To define recursive functions, McCarthy introduced the `label` notation:
+```
+(label name function-definition)
+```
+This allows a function to refer to itself by name within its own definition.
+
+### Universal Evaluator (eval)
+
+Perhaps the most profound contribution of the paper is the universal evaluator, implemented as two mutually recursive functions:
+- `eval` - Evaluates an expression in an environment
+- `apply` - Applies a function to arguments
+
+This was an early demonstration of metacircular evaluation - a language implemented in itself.
+
+## Legacy
+
+McCarthy's paper laid the foundation for functional programming, symbolic computation, and artificial intelligence. The eval/apply model remains a standard approach to implementing interpreters, and S-expressions have influenced many languages beyond Lisp.
+
+Many concepts in the paper, such as conditionals, recursion, and first-class functions, are now standard features in most programming languages.

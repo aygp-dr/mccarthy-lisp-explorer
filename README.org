@@ -1,124 +1,116 @@
-#+TITLE: McCarthy's LISP Explorer
-#+AUTHOR: 
-#+DATE: 
-#+OPTIONS: toc:2
+#+TITLE: McCarthy's Lisp Explorer
+#+AUTHOR: Aidan Pace <apace@defrecord.com>
+#+DATE: [2025-05-04 Sun]
 
-This repository contains an implementation of John McCarthy's original
-LISP language as described in his 1960 paper "Recursive Functions of
-Symbolic Expressions and Their Computation by Machine, Part I."
+* Introduction
 
-** About the Paper
+This repository contains an exploration of John McCarthy's seminal 1960 paper "Recursive Functions of Symbolic Expressions and Their Computation by Machine, Part I" - the paper that introduced Lisp to the world.
 
-McCarthy's groundbreaking 1960 paper introduced:
-- Symbolic expressions (S-expressions)
-- Recursive functions as a programming paradigm 
-- The universal evaluator (eval/apply)
-- The concept of "code as data"
+Through a practical implementation in Guile Scheme, we explore the core concepts described in McCarthy's original paper, helping to demystify this foundational work in computer science.
 
-These concepts laid the foundation for functional programming and
-influenced numerous programming languages.
+* Repository Structure
 
-** Repository Structure
+The repository is organized as follows:
 
-#+begin_src 
+#+begin_src bash
 .
-├── src
-│   ├── s-expressions.scm  # Implements the five primitive operations
-│   ├── core.scm           # Higher-level functions from the paper
-│   ├── evaluator.scm      # The eval/apply evaluator
-│   └── primitives.scm     # Additional primitive functions
-├── examples
-│   ├── hello-world.scm    # Simple introduction to S-expressions
-│   ├── factorial.scm      # Factorial implementation
-│   └── mccarthy-examples.scm # Examples from the paper
-├── tests
-│   ├── test-core.scm      # Tests for core functions
-│   └── test-evaluator.scm # Tests for the evaluator
-├── docs
-│   ├── mccarthy-paper-notes.org  # Notes on the paper
-│   ├── implementation-guide.org  # Implementation guide
-│   └── workshop-schedule.org     # One-day tutorial schedule
-├── resources
-│   └── recursive.pdf      # McCarthy's original 1960 paper
-├── mccarthy-lisp-explorer.el # Emacs support library
-└── run-all.scm            # Script to run all tests and examples
+├── docs/                  # Documentation
+│   ├── mccarthy-paper-notes.md
+│   ├── implementation-guide.md
+│   └── project-structure.mmd
+├── examples/              # Example implementations
+│   ├── hello-world.scm
+│   ├── factorial.scm
+│   └── mccarthy-examples.scm
+├── resources/             # Original paper and resources
+│   └── recursive.pdf      # McCarthy's original paper
+├── src/                   # Core implementation
+│   ├── s-expressions.scm  # S-expression primitives
+│   ├── core.scm           # Higher-level functions
+│   └── evaluator.scm      # The universal evaluator
+├── tests/                 # Test suite
+│   ├── test-core.scm
+│   └── test-evaluator.scm
+├── READING_GUIDE.org      # Guide to reading McCarthy's paper
+├── EXERCISES.org          # Exercises for deepening understanding
+├── interactive-examples.scm # Interactive demonstrations
+├── run-all.scm            # Script to verify implementation
+├── Makefile               # Project automation
+└── README.org             # This file
 #+end_src
 
-** Getting Started
+* Getting Started
 
-1. Ensure you have Guile Scheme installed:
+** Prerequisites
 
-   #+begin_src sh
-   # FreeBSD
-   pkg install guile3
+- GNU Guile Scheme (3.0 or later recommended)
+- Make (for using the Makefile)
 
-   # Ubuntu/Debian
-   sudo apt install guile-3.0
+** Setup
 
-   # macOS
-   brew install guile
-   #+end_src
+1. Clone this repository
+2. Run the setup target to download McCarthy's paper and create the directories:
 
-2. Set up the project structure and download resources:
+#+begin_src bash
+make setup
+#+end_src
 
-   #+begin_src sh
-   gmake setup
-   #+end_src
+3. Verify the implementation:
 
-3. Run all tests and examples:
+#+begin_src bash
+./run-all.scm
+#+end_src
 
-   #+begin_src sh
-   ./run-all.scm
-   #+end_src
+* Learning Path
 
-4. Explore individual examples:
+To get the most out of this exploration of McCarthy's Lisp, we recommend the following learning path:
 
-   #+begin_src sh
-   guile3 examples/hello-world.scm
-   guile3 examples/factorial.scm
-   #+end_src
+1. Start with the =READING_GUIDE.org= to understand how to approach McCarthy's paper
+2. Download and read McCarthy's original paper (=resources/recursive.pdf=)
+3. Run =interactive-examples.scm= to see the concepts demonstrated
+4. Explore the source code in the =src/= directory
+5. Work through the exercises in =EXERCISES.org= to deepen your understanding
 
-** Emacs Integration
+** Reading McCarthy's Paper
 
-This project includes Emacs support for a better development experience:
+McCarthy's original paper can be challenging to read. Our =READING_GUIDE.org= provides:
+- A suggested reading order
+- Explanations of key concepts
+- Notes on challenging sections
+- Connections between the paper and our implementation
 
-1. Ensure you have Emacs with Geiser installed:
+** Interactive Examples
 
-   #+begin_src emacs-lisp
-   ;; In Emacs
-   M-x package-install RET geiser RET
-   M-x package-install RET geiser-guile RET
-   #+end_src
+The =interactive-examples.scm= script demonstrates the key concepts from McCarthy's paper:
+- Basic S-expressions and primitives
+- Recursive functions
+- List processing functions
+- The universal evaluator (apply/eval)
 
-2. The project includes a =.dir-locals.el= file that configures Geiser to use Guile 3.
+Run it with:
 
-3. Load the custom Elisp library for additional functionality:
+#+begin_src bash
+guile interactive-examples.scm
+#+end_src
 
-   #+begin_src emacs-lisp
-   ;; In Emacs
-   M-x load-file RET mccarthy-lisp-explorer.el RET
-   M-x mccarthy-lisp-explorer-mode RET
-   #+end_src
+** Exercises
 
-4. Use the custom keybindings:
+The =EXERCISES.org= file contains a series of exercises, from beginner to advanced, to help you deepen your understanding of McCarthy's Lisp. Work through these exercises to gain mastery of the concepts.
 
-   | Keybinding  | Function                     |
-   |-------------+------------------------------|
-   | =C-c C-m o= | Open McCarthy's paper        |
-   | =C-c C-m e= | Evaluate a Lisp expression   |
-   | =C-c C-m i= | Insert a template function   |
+* Implementation Notes
 
-** Workshop
+This implementation focuses on clarity rather than efficiency, prioritizing a direct correspondence with McCarthy's original description. Some key implementation details:
 
-This repository is designed for a one-day tutorial on McCarthy's LISP.
-See =docs/workshop-schedule.org= for the suggested schedule.
+- The five primitive functions (atom, eq, car, cdr, cons) are implemented as described in section 3c
+- We use dotted-pair notation for S-expressions, as in the original paper
+- The universal evaluator (eval/apply) is implemented as described in section 3f
 
-** References
+* References
 
-- [[https://www-formal.stanford.edu/jmc/recursive.pdf][McCarthy, J. (1960). Recursive Functions of Symbolic Expressions and Their Computation by Machine, Part I.]]
+- McCarthy, J. (1960). Recursive Functions of Symbolic Expressions and Their Computation by Machine, Part I.
 - McCarthy, J. (1978). History of LISP. ACM SIGPLAN Notices, 13(8), 217-223.
-- Graham, P. (2008). [[http://www.paulgraham.com/rootsoflisp.html][The Roots of Lisp]].
+- Graham, P. (2008). The Roots of Lisp.
 
-** License
+* License
 
-MIT
+This project is released under the MIT License.

@@ -1,0 +1,76 @@
+#+TITLE: Reading Guide for McCarthy's "Recursive Functions of Symbolic Expressions"
+#+AUTHOR: McCarthy's Lisp Explorer Project
+#+DATE: [2025-05-04 Sun]
+
+* Introduction
+
+This guide is designed to help you navigate John McCarthy's seminal 1960 paper that introduced Lisp. The paper can be dense and challenging for newcomers, so this guide provides a structured approach to understanding its key concepts.
+
+* Suggested Reading Order
+
+Rather than reading the paper sequentially from start to finish, consider the following approach:
+
+1. *Introduction (Section 1)* - Provides historical context about Lisp's development.
+2. *Functions and Function Definitions (Section 2)* - Essential for understanding the mathematical foundations.
+   - Pay special attention to the concept of "conditional expressions" - a novel idea at the time.
+   - Note how recursive function definitions are enabled by conditional expressions.
+3. *Recursive Functions of Symbolic Expressions (Section 3, parts a-d)* - The core of Lisp.
+   - S-expressions (Section 3a) - The fundamental data structure.
+   - The five primitive functions (Section 3c): atom, eq, car, cdr, and cons.
+   - Examples of recursive functions (Section 3d): first explore simple examples like ff, subst, and equal.
+4. *The Universal Function apply (Section 3f)* - One of Lisp's most profound contributions.
+   - This section shows how code can be treated as data.
+   - The eval/apply mutual recursion is a key insight.
+5. *Representation in the Computer (Section 4)* - Implementation details.
+   - Skip this on first reading if you're more interested in the conceptual aspects.
+6. *Return to later sections* after understanding the core concepts.
+
+* Key Concepts to Focus On
+
+1. *S-expressions*: The fundamental data structure of Lisp, representing both code and data.
+2. *The Five Primitives*: atom, eq, car, cdr, and cons - everything in Lisp is built from these.
+3. *Conditional Expressions*: McCarthy's notation for branching that enabled recursive definitions.
+4. *Recursive Function Definitions*: How functions can be defined in terms of themselves.
+5. *The Universal Function*: How eval and apply together form a complete interpreter.
+6. *Lambda Notation*: How anonymous functions are represented.
+7. *Label Notation*: How recursive functions are named.
+
+* Challenging Sections
+
+Some sections are particularly challenging and may require multiple readings:
+
+1. *Section 3f (The Universal Function)*: The mutual recursion between eval and apply is subtle but profound.
+2. *Section 3e (Representation of S-Functions by S-Expressions)*: The translation between M-expressions and S-expressions.
+3. *Section 6 (Flowcharts and Recursion)*: Shows how traditional flowcharts relate to recursive functions.
+
+* Implementation Connections
+
+As you work through our practical implementation in Guile Scheme, note these connections:
+
+1. Our =src/s-expressions.scm= directly implements the primitives from Section 3c.
+2. Our =src/core.scm= implements the higher-level functions from Section 3d.
+3. Our =src/evaluator.scm= implements the universal evaluator from Section 3f.
+
+* Historical Context
+
+McCarthy's paper emerged when imperative programming was dominant. His innovative approach of:
+- Using recursion instead of iteration
+- Treating code as data (homoiconicity)
+- Creating a language with a small, elegant core
+
+These ideas were revolutionary and influenced countless programming languages that followed.
+
+* Notation Guide
+
+McCarthy uses several notation styles that can be confusing:
+- *M-expressions*: The meta-language used to describe functions (uses square brackets)
+- *S-expressions*: The representation within the Lisp system (uses parentheses)
+- *λ-notation*: Used to define anonymous functions
+- *label*: Used to create recursive function definitions
+
+* Further Exploration
+
+After understanding the paper, consider exploring:
+1. Paul Graham's "The Roots of Lisp" - A modern explanation of McCarthy's ideas
+2. The SICP textbook - Builds on these concepts in a more accessible way
+3. "History of Lisp" by McCarthy (1979) - Provides additional historical context

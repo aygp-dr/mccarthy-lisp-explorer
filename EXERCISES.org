@@ -1,0 +1,140 @@
+#+TITLE: Exercises for McCarthy's Lisp Explorer
+#+AUTHOR: Aidan Pace <apace@defrecord.com>
+#+DATE: [2025-05-04 Sun]
+
+* Introduction
+
+This document contains a series of exercises to deepen your understanding of the concepts in McCarthy's 1960 paper. The exercises are arranged in increasing order of difficulty, from basic to advanced.
+
+Each exercise is designed to illustrate an important aspect of McCarthy's LISP and reinforce your understanding of the paper and our implementation.
+
+* Beginner Exercises
+
+** Exercise 1: Basic S-expression Manipulation
+
+Write functions that perform the following using only the five primitive operations (=atom?=, =eq?=, =car=, =cdr=, =cons=):
+
+1. Return the second element of a list
+2. Return the third element of a list
+3. Create a list with three given elements
+4. Check if an element is a member of a list
+
+** Exercise 2: Implement Basic List Functions
+
+Implement the following list processing functions:
+
+1. =length= - Returns the number of elements in a list
+2. =reverse= - Returns a list with elements in reverse order
+3. =last= - Returns the last element of a list
+4. =nth= - Returns the nth element of a list (0-indexed)
+
+** Exercise 3: Mathematical Functions
+
+Implement the following mathematical functions using recursive definitions:
+
+1. =sum= - Sums a list of numbers
+2. =power= - Raises a number to a given power (x^n)
+3. =fibonacci= - Computes the nth Fibonacci number
+4. =product= - Computes the product of a list of numbers
+
+* Intermediate Exercises
+
+** Exercise 4: Advanced List Processing
+
+Implement these more advanced list processing functions:
+
+1. =filter= - Returns a list containing only elements that satisfy a predicate
+2. =map= - Applies a function to each element of a list
+3. =zip= - Combines two lists into a list of pairs
+4. =flatten= - Converts a nested list structure into a flat list
+
+** Exercise 5: S-expression Transformation
+
+Write functions that transform S-expressions:
+
+1. A function that replaces all occurrences of one symbol with another
+2. A function that counts the number of atoms in an S-expression (including nested ones)
+3. A function that returns the maximum depth of nesting in an S-expression
+4. A function that reverses the order of elements at every level of nesting
+
+** Exercise 6: Extend the Evaluator
+
+Extend McCarthy's evaluator (=eval= and =apply=) to handle:
+
+1. Let expressions for local variable bindings
+2. And/or special forms for boolean logic
+3. Named let for recursive local functions
+4. A simple error handling mechanism
+
+* Advanced Exercises
+
+** Exercise 7: Implement a Simple Pattern Matcher
+
+Implement a pattern matching system that can:
+
+1. Match literals and variables in patterns
+2. Match arbitrary sequences using ... notation
+3. Support predicates in patterns
+4. Return bindings of pattern variables
+
+** Exercise 8: Implement a Simple Type System
+
+Design and implement a simple type system for McCarthy's LISP:
+
+1. Define a set of basic types (number, symbol, list, function)
+2. Implement type checking for function applications
+3. Add type annotations to function definitions
+4. Report meaningful type errors
+
+** Exercise 9: Meta-circular Optimization
+
+Modify the evaluator to optimize certain patterns:
+
+1. Optimize tail calls to avoid stack growth
+2. Implement constant folding for arithmetic expressions
+3. Add memoization for recursive functions
+4. Implement an inline expansion optimization
+
+** Exercise 10: Create a Simple Compiler
+
+Design a simple compiler that translates McCarthy's LISP to a lower-level representation:
+
+1. Define a simple virtual machine with basic instructions
+2. Compile S-expressions into sequences of these instructions
+3. Implement function compilation with proper environment handling
+4. Optimize the generated code
+
+* Project Exercises
+
+** Mini-Project 1: LISP-1.5 Feature Implementation
+
+Implement features from LISP 1.5 that weren't in McCarthy's original paper:
+
+1. Property lists for symbols
+2. PROG feature for imperative programming
+3. FEXPR for special forms with unevaluated arguments
+4. I/O functions for reading and printing
+
+** Mini-Project 2: Create a REPL
+
+Build a simple Read-Eval-Print Loop (REPL) for interacting with your McCarthy LISP implementation:
+
+1. Implement a reader that parses text into S-expressions
+2. Connect the reader to the evaluator
+3. Implement a pretty-printer for S-expressions
+4. Add command history and simple debugging
+
+** Mini-Project 3: Graphical S-expression Visualizer
+
+Create a tool to visualize S-expressions and their evaluation:
+
+1. Render S-expressions as trees or nested boxes
+2. Show step-by-step evaluation of expressions
+3. Visualize environment changes during evaluation
+4. Add interactive features for exploration
+
+* Solutions
+
+Solutions to selected exercises can be found in the =solutions/= directory.
+
+Happy coding!

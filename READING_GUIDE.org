@@ -1,0 +1,138 @@
+#+TITLE: Reading Guide for McCarthy's 1960 Paper
+#+AUTHOR: Aidan Pace <apace@defrecord.com>
+#+DATE: [2025-05-04 Sun]
+
+* Introduction
+
+This guide is designed to help you read and understand John McCarthy's 1960 paper "Recursive Functions of Symbolic Expressions and Their Computation by Machine, Part I." This landmark paper introduced Lisp to the world and contains many foundational ideas in computer science.
+
+McCarthy's paper can be challenging to read due to its mathematical notation, terminology, and the fact that many concepts (like recursion and functional programming) were novel at the time. This guide provides a roadmap through the paper, highlighting key sections and explaining difficult concepts.
+
+* Suggested Reading Order
+
+While you may want to eventually read the entire paper, we suggest the following sequence to get the most important concepts first:
+
+1. Read the introduction (Section 1)
+2. Skim the formal definition of S-expressions (Section 2)
+3. Focus on the recursive functions (Section 3)
+4. Study the universal evaluator (Section 4)
+5. Skim the implementation considerations (Section 5)
+
+* Key Sections Explained
+
+** Section 1: Introduction
+
+This section explains the motivation for the paper: to show that computation can be handled through symbolic manipulation, and that recursive function definitions are a powerful way to define algorithms.
+
+Key points:
+- McCarthy wanted to formalize computation without using Turing machines
+- Recursive functions were seen as an elegant approach to computation
+- Symbolic processing was considered useful for artificial intelligence
+
+** Section 2: Recursive Functions of Symbolic Expressions
+
+This section defines S-expressions (symbolic expressions) and their basic operations.
+
+Key points:
+- S-expressions can be atomic symbols or lists of S-expressions (trees)
+- Five elementary functions: =atom=, =eq=, =car=, =cdr=, =cons=
+- These form the primitive operations from which all other functions are built
+
+** Section 3: Functions and Function Definitions
+
+This section introduces how to define functions that operate on S-expressions.
+
+Key points:
+- Conditional expressions =(cond (p₁ e₁) (p₂ e₂) ... (pₙ eₙ))=
+- Lambda expressions for anonymous functions
+- Label expressions for recursive function definitions
+- Functions for list manipulation: =ff=, =subst=, =equal=, =append=, etc.
+- Examples of mathematical functions: factorial, GCD, and sqrt
+
+** Section 4: The LISP Programming System
+
+This is perhaps the most significant section, introducing the universal Lisp evaluator.
+
+Key points:
+- The functions =eval= and =apply= that can interpret Lisp programs
+- The meta-circular evaluator (Lisp in Lisp)
+- The concept of "code as data" where programs are represented as S-expressions
+- The use of property lists and environments for evaluation
+
+** Section 5: Implementation
+
+This section discusses the practical aspects of implementing Lisp on a computer.
+
+Key points:
+- Memory representation of S-expressions
+- Garbage collection
+- The basic implementation on the IBM 704 computer
+
+* Difficult Concepts Explained
+
+** Conditional Expressions
+
+McCarthy uses a notation =(cond (p₁ => e₁) ... (pₙ => eₙ))= for conditional expressions. This is equivalent to:
+
+#+begin_src scheme
+(cond (p₁ e₁)
+      (p₂ e₂)
+      ...
+      (pₙ eₙ))
+#+end_src
+
+in modern Lisp/Scheme, where each pᵢ is a predicate and each eᵢ is a value to return if the corresponding predicate is true.
+
+** Lambda Expressions
+
+The lambda notation =λ((var₁ ... varₙ) expression)= describes an anonymous function. In modern Lisp/Scheme, this would be written as:
+
+#+begin_src scheme
+(lambda (var₁ ... varₙ) expression)
+#+end_src
+
+** Recursive Functions with Label
+
+The =label= construct =(label name func)= gives a name to a function so it can refer to itself recursively. For example:
+
+#+begin_src scheme
+(label factorial 
+  (lambda (n) 
+    (cond ((= n 0) 1)
+          (t (* n (factorial (- n 1)))))))
+#+end_src
+
+In modern Lisp/Scheme, we would use =define= instead:
+
+#+begin_src scheme
+(define (factorial n)
+  (if (= n 0)
+      1
+      (* n (factorial (- n 1)))))
+#+end_src
+
+** The Evaluator
+
+The evaluator (=eval= and =apply=) is the heart of Lisp. These mutually recursive functions interpret Lisp code represented as S-expressions. This was revolutionary: the idea that the program and the data it manipulates could have the same representation.
+
+* Connections to Our Implementation
+
+Our implementation in this repository follows McCarthy's paper closely:
+
+- We implement the five elementary functions as described in Section 3c
+- We implement higher-level functions like =equal=, =append=, etc.
+- We implement mathematical functions: factorial, GCD, and square root
+- We implement the universal evaluator (=eval= and =apply=) as described in Section 4
+
+By exploring the code in this repository alongside the paper, you'll gain a deeper understanding of McCarthy's ideas.
+
+* Further Reading
+
+After reading McCarthy's original paper, you might be interested in:
+
+- "The Roots of Lisp" by Paul Graham - A modern explanation of the core ideas
+- "LISP 1.5 Programmer's Manual" - The first full documentation of Lisp
+- "History of LISP" by John McCarthy - A retrospective by the creator
+- "Structure and Interpretation of Computer Programs" by Abelson and Sussman - A classic text that builds on many of McCarthy's ideas
+
+Happy reading!
