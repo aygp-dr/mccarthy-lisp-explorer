@@ -1,0 +1,7 @@
+;; Original McCarthy evaluator (simplified)
+(define (mc-eval expr env)
+  (cond ((atom? expr) (lookup expr env))
+        ((eq? (car expr) 'quote) (cadr expr))
+        ((eq? (car expr) 'cond) (evcond (cdr expr) env))
+        (else (mc-apply (mc-eval (car expr) env)
+                       (evlis (cdr expr) env)))))
