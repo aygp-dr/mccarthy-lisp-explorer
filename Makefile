@@ -1,7 +1,8 @@
 .PHONY: all clean resources test deps
 
-GREP = ggrep
-GUILE = guile3
+# FreeBSD-specific settings (change if needed)
+GREP ?= ggrep
+GUILE ?= guile3
 export GUILE_LOAD_PATH := $(CURDIR)/src:$(GUILE_LOAD_PATH)
 
 deps: ## Install dependencies
@@ -61,7 +62,7 @@ coq-test: ## Run Coq proofs
 	@cd proofs && bash ./setup.sh && coqc all_tests.v
 	@echo "Coq proofs completed."
 
-examples: ## Run example code
+run-examples: ## Run example code
 	@echo "Running examples..."
 	@$(GUILE) -L src -s examples/math-functions.scm
 	@$(GUILE) -L src -s examples/mccarthy-examples.scm

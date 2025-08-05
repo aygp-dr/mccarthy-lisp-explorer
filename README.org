@@ -1,6 +1,7 @@
 #+TITLE: McCarthy's Lisp Explorer
 #+AUTHOR: Aidan Pace <apace@defrecord.com>, Jason Walsh <j@wal.sh>
 #+DATE: [2025-05-05 Mon]
+#+VERSION: 0.1.0
 
 * Introduction
 
@@ -15,26 +16,47 @@ The repository is organized as follows:
 #+begin_src bash
 .
 ├── docs/                  # Documentation
-│   ├── mccarthy-paper-notes.md
-│   ├── implementation-guide.md
-│   └── project-structure.mmd
+│   ├── mccarthy-paper-notes.org
+│   ├── implementation-guide.org
+│   ├── project-structure.mmd
+│   └── workshop-schedule.org
 ├── examples/              # Example implementations
 │   ├── hello-world.scm
 │   ├── factorial.scm
+│   ├── math-functions.scm
+│   ├── mccarthy-1960.scm
 │   └── mccarthy-examples.scm
 ├── resources/             # Original paper and resources
 │   └── recursive.pdf      # McCarthy's original paper
 ├── src/                   # Core implementation
 │   ├── s-expressions.scm  # S-expression primitives
 │   ├── core.scm           # Higher-level functions
-│   └── evaluator.scm      # The universal evaluator
+│   ├── evaluator.scm      # The universal evaluator
+│   ├── primitives.scm     # Basic primitive functions
+│   └── ap/                # Advanced implementation
+│       └── mccarthy.scm
 ├── tests/                 # Test suite
 │   ├── test-core.scm
-│   └── test-evaluator.scm
+│   ├── test-evaluator.scm
+│   ├── test-math-functions.scm
+│   └── test-mccarthy-functions.scm
 ├── READING_GUIDE.org      # Guide to reading McCarthy's paper
 ├── EXERCISES.org          # Exercises for deepening understanding
+├── proofs/                # Coq formal verification
+│   ├── basic/
+│   ├── factorial/
+│   ├── fibonacci/
+│   ├── gcd/
+│   ├── lambda/
+│   └── sqrt/
+├── presentation/          # Presentation materials
+│   └── tangled code examples
+├── coq-proofs.org         # Coq proofs literate programming
+├── coq-proofs-new.org     # Updated Coq proofs
 ├── interactive-examples.scm # Interactive demonstrations
 ├── run-all.scm            # Script to verify implementation
+├── presentation.org       # Presentation slides source
+├── citations.bib          # Bibliography
 ├── Makefile               # Project automation
 └── README.org             # This file
 #+end_src
@@ -55,13 +77,13 @@ The repository is organized as follows:
 2. Run the setup target to download McCarthy's paper and create the directories:
 
 #+begin_src bash
-gmake setup
+make setup  # or gmake setup on FreeBSD
 #+end_src
 
 3. Verify the implementation:
 
 #+begin_src bash
-gmake run-all
+make run-all  # or gmake run-all on FreeBSD
 #+end_src
 
 * Learning Path
@@ -93,13 +115,13 @@ The =interactive-examples.scm= script demonstrates the key concepts from McCarth
 Run it with:
 
 #+begin_src bash
-gmake examples
+make run-examples  # or gmake run-examples on FreeBSD
 #+end_src
 
 Or to run a specific example:
 
 #+begin_src bash
-gmake GUILE_SCRIPT=interactive-examples.scm run-script
+make GUILE_SCRIPT=interactive-examples.scm run-script  # or gmake on FreeBSD
 #+end_src
 
 ** Exercises
@@ -109,7 +131,7 @@ The =EXERCISES.org= file contains a series of exercises, from beginner to advanc
 You can run the exercises with:
 
 #+begin_src bash
-gmake org-exercises
+make org-exercises  # or gmake org-exercises on FreeBSD
 #+end_src
 
 ** Running Tests
@@ -117,10 +139,11 @@ gmake org-exercises
 You can run the tests to verify the implementation:
 
 #+begin_src bash
-gmake test            # Run all tests (Scheme and Coq)
-gmake scheme-test     # Run only Scheme tests
-gmake coq-test        # Run only Coq tests
-gmake trace           # Run tests with tracing enabled
+make test            # Run all tests (Scheme and Coq)
+make scheme-test     # Run only Scheme tests
+make coq-test        # Run only Coq tests
+make trace           # Run tests with tracing enabled
+# Use gmake instead of make on FreeBSD
 #+end_src
 
 * Implementation Notes
@@ -136,9 +159,10 @@ This implementation focuses on clarity rather than efficiency, prioritizing a di
 The repository includes a presentation that can be used for teaching about McCarthy's Lisp. You can:
 
 #+begin_src bash
-gmake presentation.pdf  # Build the presentation PDF
-gmake present           # Start the presentation (uses pdfpc if available)
-gmake presentation-tangle # Tangle code blocks from the presentation
+make presentation.pdf  # Build the presentation PDF
+make present           # Start the presentation (uses pdfpc if available)
+make presentation-tangle # Tangle code blocks from the presentation
+# Use gmake instead of make on FreeBSD
 #+end_src
 
 * References
@@ -148,6 +172,19 @@ gmake presentation-tangle # Tangle code blocks from the presentation
 - Graham, P. (2008). The Roots of Lisp.
 - Abelson, H., & Sussman, G. J. (1996). Structure and Interpretation of Computer Programs.
 
+* Contributing
+
+Contributions are welcome! Please feel free to submit issues or pull requests on GitHub.
+
 * License
 
 This project is released under the MIT License.
+
+* Version History
+
+- 0.1.0 (2025-08-05): Initial release
+  - Complete implementation of McCarthy's five primitive functions
+  - Universal evaluator (eval/apply)
+  - Comprehensive test suite with Scheme and Coq proofs
+  - Educational materials including reading guide and exercises
+  - Presentation materials for teaching
