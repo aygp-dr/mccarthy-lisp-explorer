@@ -1,9 +1,13 @@
 .PHONY: all clean resources test deps
 
+# Project configuration
+PROJECT_NAME := mccarthy-lisp-explorer
+PROJECT_ROOT := $(CURDIR)
+
 # FreeBSD-specific settings (change if needed)
 GREP ?= ggrep
 GUILE ?= guile3
-export GUILE_LOAD_PATH := $(CURDIR)/src:$(GUILE_LOAD_PATH)
+export GUILE_LOAD_PATH := $(PROJECT_ROOT)/src:$(GUILE_LOAD_PATH)
 
 deps: ## Install dependencies
 	@scripts/deps.sh
@@ -132,6 +136,22 @@ present: presentation.pdf ## Present slides with pdfpc or fallback to PDF viewer
 		fi \
 	fi
 
+emacs-session: ## Start a tmux session with project-specific Emacs configuration
+	@echo "Starting tmux session '$(PROJECT_NAME)' with Emacs..."
+	@tmux new-session -d -s $(PROJECT_NAME) "emacs -nw -Q -l $(PROJECT_ROOT)/$(PROJECT_NAME).el" 2>/dev/null || \
+		(echo "Session '$(PROJECT_NAME)' already exists. Attaching..." && tmux attach-session -t $(PROJECT_NAME))
+	@echo "Tmux session '$(PROJECT_NAME)' started with Emacs."
+	@echo "Run 'tmux attach -t $(PROJECT_NAME)' to connect."
+
+emacs-tty: ## Get the TTY of the tmux pane running Emacs
+	@tmux list-panes -t $(PROJECT_NAME) -F "#{pane_tty}" 2>/dev/null || \
+		echo "No tmux session '$(PROJECT_NAME)' found. Run 'make emacs-session' first."
+
+kill-session: ## Kill the tmux session for this project
+	@tmux kill-session -t $(PROJECT_NAME) 2>/dev/null && \
+		echo "Tmux session '$(PROJECT_NAME)' killed." || \
+		echo "No tmux session '$(PROJECT_NAME)' found."
+
 help: ## Show this help menu
 	@echo 'Usage: make [TARGET]'
 	@echo ''
@@ -145,3 +165,4 @@ help: ## Show this help menu
 	@echo '  make coq-test         # Run only Coq tests'
 	@echo '  make presentation.pdf # Build the presentation'
 	@echo '  make present          # Start the presentation'
+	@echo '  make emacs-session    # Start tmux session with Emacs'

@@ -1,98 +1,105 @@
-;;; mccarthy-lisp-explorer.el --- Support for McCarthy Lisp exploration -*- lexical-binding: t; -*-
-
-;; Author: Emacs User
-;; Keywords: lisp, guile, scheme
-;; Package-Requires: ((emacs "25.1") (geiser "0.16") (geiser-guile "0.16"))
+;;; mccarthy-lisp-explorer.el --- Emacs configuration for McCarthy Lisp Explorer -*- lexical-binding: t -*-
 
 ;;; Commentary:
-;; This package provides support for working with McCarthy's original Lisp
-;; concepts in a modern Guile Scheme environment.
-;;
-;; Usage:
-;;   (require 'mccarthy-lisp-explorer)
-;;   (mccarthy-lisp-explorer-mode)
+;; Project-specific Emacs configuration for Scheme development with
+;; Geiser, Guile3, Org mode, TRAMP, and Paredit support.
 
 ;;; Code:
 
+;; Package initialization
+(require 'package)
+(setq package-archives '(("melpa" . "https://melpa.org/packages/")
+                         ("gnu" . "https://elpa.gnu.org/packages/")))
+(package-initialize)
+
+;; Ensure required packages are installed
+(defvar mccarthy-required-packages
+  '(geiser
+    geiser-guile
+    paredit
+    org
+    rainbow-delimiters))
+
+(dolist (pkg mccarthy-required-packages)
+  (unless (package-installed-p pkg)
+    (package-refresh-contents)
+    (package-install pkg)))
+
+;; Project settings
+(defvar mccarthy-project-root
+  (file-name-directory (or load-file-name buffer-file-name))
+  "Root directory of the McCarthy Lisp Explorer project.")
+
+(defvar mccarthy-project-name "mccarthy-lisp-explorer"
+  "Name of the McCarthy Lisp Explorer project.")
+
+;; Geiser configuration for Guile
 (require 'geiser)
 (require 'geiser-guile)
+(setq geiser-guile-binary "guile3")
+(setq geiser-active-implementations '(guile))
+(setq geiser-default-implementation 'guile)
+(setq geiser-guile-load-path (list (expand-file-name "src" mccarthy-project-root)))
 
-(defgroup mccarthy-lisp-explorer nil
-  "Tools for exploring McCarthy's original Lisp concepts."
-  :group 'lisp
-  :prefix "mccarthy-lisp-explorer-")
+;; Paredit mode for structured editing
+(require 'paredit)
+(add-hook 'scheme-mode-hook #'paredit-mode)
+(add-hook 'geiser-repl-mode-hook #'paredit-mode)
+(add-hook 'emacs-lisp-mode-hook #'paredit-mode)
 
-(defcustom mccarthy-lisp-explorer-resources-dir "resources"
-  "Directory containing resources such as McCarthy's papers."
-  :type 'string
-  :group 'mccarthy-lisp-explorer)
+;; Rainbow delimiters for better parenthesis visibility
+(require 'rainbow-delimiters)
+(add-hook 'scheme-mode-hook #'rainbow-delimiters-mode)
+(add-hook 'geiser-repl-mode-hook #'rainbow-delimiters-mode)
+(add-hook 'emacs-lisp-mode-hook #'rainbow-delimiters-mode)
 
-(defvar mccarthy-lisp-explorer-mode-map
-  (let ((map (make-sparse-keymap)))
-    (define-key map (kbd "C-c C-m o") 'mccarthy-lisp-explorer-open-paper)
-    (define-key map (kbd "C-c C-m e") 'mccarthy-lisp-explorer-eval-expression)
-    (define-key map (kbd "C-c C-m i") 'mccarthy-lisp-explorer-insert-function)
-    map)
-  "Keymap for mccarthy-lisp-explorer-mode.")
+;; Org mode configuration for literate programming
+(require 'org)
+(org-babel-do-load-languages
+ 'org-babel-load-languages
+ '((scheme . t)
+   (emacs-lisp . t)
+   (shell . t)))
 
-(defun mccarthy-lisp-explorer-open-paper ()
-  "Open McCarthy's original paper on recursive functions."
+;; Set up org-babel for Scheme
+(setq org-babel-scheme-command "guile3")
+(setq org-confirm-babel-evaluate nil)
+
+;; TRAMP configuration (for remote development if needed)
+(require 'tramp)
+(setq tramp-default-method "ssh")
+
+;; Project-specific key bindings
+(global-set-key (kbd "C-c g r") 'geiser-mode)
+(global-set-key (kbd "C-c g c") 'geiser-connect)
+(global-set-key (kbd "C-c g e") 'geiser-eval-last-sexp)
+(global-set-key (kbd "C-c g b") 'geiser-eval-buffer)
+(global-set-key (kbd "C-c g d") 'geiser-doc-symbol-at-point)
+
+;; File associations
+(add-to-list 'auto-mode-alist '("\\.scm\\'" . scheme-mode))
+(add-to-list 'auto-mode-alist '("\\.ss\\'" . scheme-mode))
+
+;; Start Geiser REPL automatically for Scheme files in project
+(defun mccarthy-setup-scheme-buffer ()
+  "Setup Scheme buffer with project-specific configuration."
+  (when (and (eq major-mode 'scheme-mode)
+             (string-prefix-p mccarthy-project-root default-directory))
+    (geiser-mode 1)
+    (setq-local geiser-guile-load-path
+                (list (expand-file-name "src" mccarthy-project-root)))))
+
+(add-hook 'scheme-mode-hook #'mccarthy-setup-scheme-buffer)
+
+;; Custom REPL startup
+(defun mccarthy-start-repl ()
+  "Start a Geiser REPL for the McCarthy Lisp Explorer project."
   (interactive)
-  (let ((paper-path (expand-file-name "recursive.pdf" mccarthy-lisp-explorer-resources-dir)))
-    (if (file-exists-p paper-path)
-        (find-file paper-path)
-      (message "Paper not found at %s. Run 'make resources/recursive.pdf' first." paper-path))))
+  (let ((geiser-guile-load-path (list (expand-file-name "src" mccarthy-project-root))))
+    (geiser 'guile)))
 
-(defun mccarthy-lisp-explorer-eval-expression (expr)
-  "Evaluate a Lisp expression using Geiser.
-EXPR is the expression to evaluate."
-  (interactive "sEvaluate expression: ")
-  (geiser-eval-region (point) (point) expr))
-
-(defun mccarthy-lisp-explorer-insert-function (func-name)
-  "Insert a template for a primitive McCarthy Lisp function.
-FUNC-NAME is the name of the function to insert."
-  (interactive "sFunction name: ")
-  (let ((template (format "(define (%s . args)
-  ;; Implementation of %s
-  )" func-name func-name)))
-    (insert template)))
-
-(defun mccarthy-lisp-explorer-setup-geiser ()
-  "Set up Geiser for McCarthy Lisp exploration."
-  (when (and (featurep 'geiser) (featurep 'geiser-guile))
-    (setq-local geiser-guile-binary "guile3")
-    (setq-local geiser-active-implementations '(guile))))
-
-(defun mccarthy-lisp-explorer-setup-org-babel ()
-  "Set up org-babel for McCarthy Lisp Explorer."
-  (when (featurep 'org)
-    ;; Configure org-babel languages
-    (org-babel-do-load-languages
-     'org-babel-load-languages
-     '((scheme . t)
-       (shell . t)
-       (emacs-lisp . t)
-       (coq . t)))
-    
-    ;; Configure Org mode
-    (setq org-confirm-babel-evaluate nil)
-    (setq org-src-fontify-natively t)
-    (setq org-src-tab-acts-natively t)))
-
-(defun mccarthy-lisp-explorer-setup-proof-general ()
-  "Set up Proof General for Coq integration."
-  (when (featurep 'proof-general)
-    (setq proof-three-window-mode-policy 'hybrid)))
-
-;;;###autoload
-(define-minor-mode mccarthy-lisp-explorer-mode
-  "Minor mode for exploring McCarthy's original Lisp concepts."
-  :lighter " McCarthyLisp"
-  :keymap mccarthy-lisp-explorer-mode-map
-  (mccarthy-lisp-explorer-setup-geiser)
-  (mccarthy-lisp-explorer-setup-org-babel)
-  (mccarthy-lisp-explorer-setup-proof-general))
+;; Display startup message
+(message "McCarthy Lisp Explorer environment loaded from %s" mccarthy-project-root)
 
 (provide 'mccarthy-lisp-explorer)
 ;;; mccarthy-lisp-explorer.el ends here
