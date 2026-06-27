@@ -1,4 +1,3 @@
-#+TITLE: CLAUDE.org Guide for this Repository
 #+AUTHOR: 
 #+DATE: 
 #+OPTIONS: toc:2
